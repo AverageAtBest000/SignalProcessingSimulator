@@ -10,7 +10,7 @@ class Generator:
         return np.where(T >= t_0, raw_wave, 0)
     
     @classmethod
-    def get_PMT_signal(cls, A, T, t_0, Tao_fall_nano, Tao_rise_nano, Tao_fall_spe_nano, Tao_rise_spe_nano):
+    def get_PMT_signal(cls, A, T, t_0, Tao_fall, Tao_rise, Tao_fall_spe, Tao_rise_spe):
         
         num_samples = len(T)
         dt = T[1] - T[0]
@@ -18,7 +18,7 @@ class Generator:
         signal = np.zeros(num_samples)
         rng = np.random.default_rng()
         
-        expected = cls.get_double_exponential(A, T, t_0, Tao_fall_nano, Tao_rise_nano)
+        expected = cls.get_double_exponential(A, T, t_0, Tao_fall, Tao_rise)
         expected = np.clip(expected, 0, None) * dt
         
         arrival_noise = stats.poisson.rvs(expected, size = len(expected))    
@@ -30,7 +30,7 @@ class Generator:
             for j in range(arrival_noise[i]):
                 A_j = rng.normal(1.0, 0.2)
                 t_j = T[i]
-                signal += cls.get_double_exponential(A_j, T, t_j , Tao_fall_spe_nano, Tao_rise_spe_nano)
+                signal += cls.get_double_exponential(A_j, T, t_j , Tao_fall_spe, Tao_rise_spe)
         
         return signal
         

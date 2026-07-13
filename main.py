@@ -6,11 +6,11 @@ from signalGeneration import Generator
 
 generator = Generator()
 
-num_miscroseconds = 100
-num_samples= 10000
+num_nanoseconds = 100
+num_samples = 5000
 
-X = np.linspace(0,num_miscroseconds, num_samples)
-Y = generator.get_PMT_signal(A = 300, T = X, t_0 = -10, Tao_fall=2.5, Tao_rise=0.7, Tao_fall_spe = 8 , Tao_rise_spe = 1.5)
+X = np.linspace(0,num_nanoseconds, num_samples)
+Y = generator.get_PMT_signal(A = 100, T = X, t_0 = 10, Tao_fall_nano=2.1, Tao_rise_nano=0.9, Tao_fall_spe_nano = 6 , Tao_rise_spe_nano = 2)
 
 plt.plot(X,Y)
 plt.show() 
