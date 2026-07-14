@@ -6,7 +6,7 @@ from typing_extensions import deprecated
 
 class Generator: 
     
-    """ Methods for simulation of PMT signal with scintillator"""
+    """============ Methods for simulation of PMT signal with scintillator=============="""
 
     @deprecated("use normalized_double_exponential(), get_arival_rate() instead")
     def get_double_exponential(cls, num_photoelectrons, T, t_0, Tao_fall, Tao_rise):
@@ -29,8 +29,8 @@ class Generator:
 
                 
     @classmethod
-    def get_photoelectron_voltage(cls, time_array, time_of_generation, polarity, SPE_pulse_area, relative_gain, double_exponential_SPE):
-        return polarity * SPE_pulse_area * relative_gain * double_exponential_SPE * (time_array - time_of_generation)
+    def get_photoelectron_voltage(cls, polarity, SPE_pulse_area, relative_gain, double_exponential_SPE):
+        return polarity * SPE_pulse_area * relative_gain * double_exponential_SPE 
 
 
 
@@ -43,6 +43,7 @@ class Generator:
             return termination_resistance * constants.elementary_charge * PMT_gain 
         else:
             raise ValueError("Please enter a valid method for pulse calculation")
+
 
 
     @classmethod
@@ -67,18 +68,15 @@ class Generator:
 
                 relative_gain = rng.normal(1.0, 0.2)
                 photoelectron_time = time_array[i]
-                polarity = -1 
+                polarity = 1 
 
-                signal += cls.get_photoelectron_voltage(time_array = time_array, 
-                                                        time_of_generation = photoelectron_time, 
-                                                        polarity = polarity, 
-                                                        SPE_pulse_area = cls.set_pulse_area(method="direct", SPE_pulse_area=1.6),
-                                                        relative_gain = relative_gain,
-                                                        double_exponential_SPE = cls.normalized_double_exponential(time_array = time_array, 
-                                                                                                                    t_0 = photoelectron_time, 
-                                                                                                                    Tao_fall = Tao_fall_spe, 
-                                                                                                                    Tao_rise = Tao_rise_spe )
+                signal += cls.get_photoelectron_voltage( polarity = polarity, 
+                                                         SPE_pulse_area = cls.set_pulse_area(method="direct", SPE_pulse_area=8.0e-12),
+                                                         relative_gain = relative_gain,
+                                                         double_exponential_SPE = cls.normalized_double_exponential(time_array = time_array, 
+                                                                                                                     t_0 = photoelectron_time, 
+                                                                                                                     Tao_fall = Tao_fall_spe, 
+                                                                                                                     Tao_rise = Tao_rise_spe )
                                                         )
-        
         return signal
         
