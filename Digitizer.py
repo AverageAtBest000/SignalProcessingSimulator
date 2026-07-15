@@ -22,8 +22,9 @@ class Digitizer:
         if(len(time_array) < 2):
             raise ValueError("time_array and voltage_array must contain at least 2 samples")
         
-        if not np.all(np.isfinite(time_array)) or not np.all(np.isfinite(time_array)): 
+        if not np.all(np.isfinite(time_array)) or not np.all(np.isfinite(voltage_array)): 
             raise ValueError("time_array and voltage_array must contain only finite values")
+
         unimplemented = (event_threshold, polarity, pre_trigger_time, post_trigger_time)
         for param in unimplemented:
             if param is not None:  
@@ -37,7 +38,7 @@ class Digitizer:
         num_periods = (t_final - t_0)/ sample_period
         num_periods = int(np.floor(np.nextafter(num_periods, np.inf)))
 
-        discrete_times = t_0 + np.arrange(num_periods + 1 ) * sample_period 
+        discrete_times = t_0 + np.arange(num_periods + 1 ) * sample_period 
 
         voltage_samples = cls.interpolate(time_array, voltage_array, discrete_times)
         

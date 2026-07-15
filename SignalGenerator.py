@@ -65,7 +65,7 @@ class Generator:
             #for every photon that arrived in that time step
             for photoelectron in range(photoelectron_arrivals[i]):
 
-                relative_gain = np.clip(rng.normal(1.0, 0.2))
+                relative_gain = np.clip(rng.normal(1.0, 0.2),0)
                 photoelectron_time = time_array[i]
 
                 signal += cls.get_photoelectron_voltage( polarity = polarity, 
