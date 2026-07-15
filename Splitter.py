@@ -1,28 +1,23 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[3]:
-
-
 import numpy as np
+from scipy.constants import R
 
 class Splitter:
-    def _init_(self, time_array, volts_array, impedance_to_out1, impedance_to_out2):
-        self.time_array = np.array(time_array)
-        self.volts_array = np.array(volts_array)
-        self.z_out1 = impedance_to_out1
-        self.z_out2 = impedance_to_out2
+    def __init__(self, R1, R2, R3):
+        self.R1 = R1
+        self.R2 = R2
+        self.R3 = R3
         
-    def split(self, r1, r2, r3):
-        branch1 = r2 + self.z_out1
-        branch2 = r3 + self.z_out2
+    def split( self, time_array, volts_array, load_1_impedance, load_2_impedance, source_impedance ):
         
-        z_parallel = (branch1 * branch2) / (branch1 + branch2)
+        branch_1_impedance = self.R2 + load_1_impedance
+        branch_2_impedance = self.R3 + load_2_impedance
         
-        v_node = self.volts_array * (z_parallel / (r1 + z_parallel))
+        parallel_impedance = (branch_1_impedance * branch_2_impedance) / (branch_1_impedance + branch_2_impedance)
         
-        v_out1 = v_node * (self.z_out1 / branch1)
-        v_out2 = v_node * (self.z_out2 / branch2)
+        v_node = volts_array * (z_parallel / (source_impedance + self.R1 + parallel_impedance))
         
-        return v_out1, v_out2
+        v_out1 = v_node * (impedance_to_out1 / branch_1_impedance)
+        v_out2 = v_node * (impedance_to_out2 / branch_2_impedance)
+        
+        return time_array, v_out1, v_out2
 
