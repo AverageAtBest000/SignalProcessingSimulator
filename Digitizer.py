@@ -7,11 +7,11 @@ class Digitizer:
     
     @classmethod
     def digitize(cls, time_array, voltage_array, 
-                 sampling_rate_seconds, num_bits, 
-                 min_volts, max_volts, event_treshold, 
-                 polarity, pre_trigger_time, post_trigger_time):
+                 sampling_rate_Hz, num_bits, 
+                 min_volts, max_volts, event_treshold = None, 
+                 polarity = None, pre_trigger_time = None, post_trigger_time = None):
         
-        sample_period = 1 / sampling_rate_seconds
+        sample_period = 1 / sampling_rate_Hz
         t_0 = time_array[0]
         t_final = time_array[len(time_array) - 1 ]
         
