@@ -1,41 +1,35 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.constants import value
 import scipy.stats as stats
 
 class Digitizer:
-    
+    """ Add event_threshold , polarity , pre_trigger_time , post_trigger_time later """
     @classmethod
     def digitize(cls, time_array, voltage_array, 
                  sampling_rate_Hz, num_bits, 
-                 min_volts, max_volts, event_treshold = None, 
-                 polarity = None, pre_trigger_time = None, post_trigger_time = None):
-        
+                 min_volts, max_volts):
+    
         sample_period = 1 / sampling_rate_Hz
         t_0 = time_array[0]
         t_final = time_array[len(time_array) - 1 ]
         
         discrete_times = np.linspace(t_0, t_final, (t_final - t_0)/sample_period)
-        voltage_samples = np.zeros(len(discrete_times))
+        voltage_samples = cls.interpolate(time_array, voltage_array, discrete_times)
         
-        for i in range(len(discrete_times)): 
-            if np.any( time_array == discrete_times[i]):
-                voltage_samples[i] = voltage_array[time_array == discrete_times[i]][0]           
-            else:
-                voltage_samples[i] = cls.interpolate(time_array, voltage_array, discrete_times[i])
-                
         clipped_voltage_samples = np.clip(voltage_samples, min_volts, max_volts)
-        was_clipped = np.array_equal(voltage_samples, clipped_voltage_samples)
-        
+        was_clipped = (voltage_samples > max_volts) or (voltage_samples <= min_volts) 
+
         voltage_span = max_volts - min_volts
-        least_significant_bit = (voltage_span) / ( 2 ** num_bits)
+        least_significant_bit = (voltage_span) / ( 2 ** num_bits - 1)
         
         #Floor being used for quantization - document this 
-        Digitized_array = np.floor( (clipped_voltage_samples - min_volts) / least_significant_bit  )
+        Digitized_array = int(np.floor( (clipped_voltage_samples - min_volts) / least_significant_bit  ))
         Reconstructed_array = min_volts + (Digitized_array + 1/2)*least_significant_bit
         
         
-        return Digitized_array, Reconstructed_array, was_clipped
+        return discrete_times, Digitized_array, Reconstructed_array, was_clipped
         
         
     @classmethod

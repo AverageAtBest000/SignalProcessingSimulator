@@ -1,6 +1,5 @@
 import numpy as np
-from scipy.constants import R
-
+"""Ideal resistor model- add cable delay, reflections, capacitance, etc. later on"""
 class Splitter:
     def __init__(self, R1, R2, R3):
         self.R1 = R1
@@ -8,7 +7,9 @@ class Splitter:
         self.R3 = R3
         
     def split( self, time_array, volts_array, load_1_impedance, load_2_impedance, source_impedance ):
-        
+        if len(time_array) != len(volts_array):
+            raise ValueError("Time and Voltage array must be equal in length")
+            
         branch_1_impedance = self.R2 + load_1_impedance
         branch_2_impedance = self.R3 + load_2_impedance
         
