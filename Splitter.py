@@ -14,10 +14,10 @@ class Splitter:
         
         parallel_impedance = (branch_1_impedance * branch_2_impedance) / (branch_1_impedance + branch_2_impedance)
         
-        v_node = volts_array * (z_parallel / (source_impedance + self.R1 + parallel_impedance))
+        v_node = volts_array * (parallel_impedance / (source_impedance + self.R1 + parallel_impedance))
         
-        v_out1 = v_node * (impedance_to_out1 / branch_1_impedance)
-        v_out2 = v_node * (impedance_to_out2 / branch_2_impedance)
+        v_out1 = v_node * (load_1_impedance / branch_1_impedance)
+        v_out2 = v_node * (load_2_impedance / branch_2_impedance)
         
         return time_array, v_out1, v_out2
 
