@@ -8,6 +8,7 @@ import scipy.stats as stats
 
 class Digitizer:
     """ Add event_threshold , polarity , pre_trigger_time , post_trigger_time later """
+    
     @classmethod
     def digitize(cls, time_array, voltage_array, 
                  sampling_rate_Hz, num_bits, 
@@ -54,8 +55,7 @@ class Digitizer:
         Digitized_array = np.clip(Digitized_array, 0, num_levels - 1,).astype(int)
         
         Reconstructed_array = min_volts + (Digitized_array + 1/2)*least_significant_bit
-        
-        
+    
         return (discrete_times, Digitized_array, Reconstructed_array, was_clipped)
         
         
