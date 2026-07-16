@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy.stats as stats
 import scipy.constants as constants
 from typing_extensions import deprecated
 

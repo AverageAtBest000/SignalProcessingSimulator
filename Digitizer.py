@@ -1,10 +1,5 @@
-
-from multiprocessing import Value
-
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.constants import value
-import scipy.stats as stats
+
 
 class Digitizer:
     """ Add event_threshold , polarity , pre_trigger_time , post_trigger_time later """

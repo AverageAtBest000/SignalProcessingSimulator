@@ -1,4 +1,4 @@
-import numpy as np
+
 """Ideal resistor model- add cable delay, reflections, capacitance, etc. later on"""
 class Splitter:
     def __init__(self, R1, R2, R3):

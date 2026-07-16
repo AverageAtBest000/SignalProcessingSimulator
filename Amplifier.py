@@ -1,12 +1,9 @@
-from typing import Self
 import numpy as np
-import matplotlib.pyplot as plt
 import scipy.signal as signal
-
 
 class Amplifier:
     
-    def __init__(self, gain, gain_units, source_impedance, output_impedance, low_cutoff_freq = None, high_cutoff_freq = None):
+    def __init__(self, gain, gain_units, input_impedance, output_impedance, low_cutoff_freq = None, high_cutoff_freq = None):
         
         if gain_units.lower() == "db":
             self.gain = 10 ** (gain/20)
@@ -17,7 +14,7 @@ class Amplifier:
 
         self.low_cutoff_freq = low_cutoff_freq
         self.high_cutoff_freq = high_cutoff_freq
-        self.source_impedance = source_impedance
+        self.input_impedance = input_impedance
         self.output_impedance = output_impedance
 
 
