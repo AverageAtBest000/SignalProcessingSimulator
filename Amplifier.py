@@ -15,6 +15,13 @@ class Amplifier:
         if min_voltage_out > max_voltage_out:
             raise ValueError("max_voltage_out must be greater than min_voltage_out")
 
+        if low_cutoff_freq is not None and high_cutoff_freq is not none:
+            if low_cutoff_freq > high_cutoff_freq:
+                raise ValueError("high_cutoff_freq must be greater than low_cutoff_freq")
+
+        if input_impedance < 0 or output_impedance < 0:
+            raise ValueError("input_impedance and output_inpedance must be greater than zero")
+
         self.low_cutoff_freq = low_cutoff_freq
         self.high_cutoff_freq = high_cutoff_freq
         self.input_impedance = input_impedance
@@ -31,6 +38,7 @@ class Amplifier:
         time_delta = time_array[1] - time_array[0]
 
         sampling_frequency = 1 / time_delta
+        
         nyquist_frequency = sampling_frequency / 2
 
         amplified_voltage = voltage_array - signal_baseline
@@ -38,10 +46,16 @@ class Amplifier:
         amplified_voltage = amplified_voltage * self.gain
 
         if self.low_cutoff_freq is not None:
-            amplified_voltage = self.apply_low_freq_cutoff(amplified_voltage, self.low_cutoff_freq, time_delta)
+            if self.low_cutoff_freq < nyquist_frequency:    
+                amplified_voltage = self.apply_low_freq_cutoff(amplified_voltage, self.low_cutoff_freq, time_delta)
+            else:
+                raise ValueError("low_cutoff_freq must be less than the nyquist")
 
         if self.high_cutoff_freq is not None:
-            amplified_voltage = self.apply_high_freq_cutoff(amplified_voltage, self.high_cutoff_freq, time_delta)
+            if self.high_cutoff_freq < nyquist_frequency:
+                amplified_voltage = self.apply_high_freq_cutoff(amplified_voltage, self.high_cutoff_freq, time_delta)
+            else:
+                raise ValueError("high_cutoff_freq must be less than the nyquist")
 
         amplified_voltage = np.min(self.max_voltage_out, np.max(self.min_voltage_out, amplified_voltage))
 
