@@ -6,11 +6,11 @@ import scipy.signal as signal
 
 class Amplifier:
     
-    def __init__(self, gain, gain_uints, source_impedence, output_impedence, low_cutoff_freq = None, high_cutoff_freq = None):
+    def __init__(self, gain, gain_units, source_impedence, output_impedence, low_cutoff_freq = None, high_cutoff_freq = None):
         
         if gain_units.lower() == "db":
             self.gain = 10 ** (gain/20)
-        elif gain_uints.lower() == "unitless":
+        elif gain_units.lower() == "unitless":
             self.gain = gain        
         else: 
             raise ValueError("Invalid gain unit. Use \"db\" or \"unitless\" ")
@@ -23,7 +23,7 @@ class Amplifier:
 
     def amplify(self, time_array, voltage_array, signal_baseline):
         
-        if len(time_array) != len(voltage_array) and len(time_array) < 2:
+        if len(time_array) != len(voltage_array) or len(time_array) < 2:
             raise ValueError("voltage_array and time_array must be of equal length and have at least two samples")
 
         time_delta = time_array[1] - time_array[0]
@@ -36,10 +36,10 @@ class Amplifier:
         amplified_voltage = amplified_voltage * self.gain
 
         if self.low_cutoff_freq is not None:
-            amplified_voltage = apply_low_freq_cutoff(amplified_voltage, self.low_cutoff_freq)
+            amplified_voltage = self.apply_freq_cutoff(amplified_voltage, self.low_cutoff_freq, time_delta)
 
         if self.high_cutoff_freq is not None:
-            amplified_voltage = apply_low_freq_cutoff(amplified_voltage, self.high_cutoff_freq)
+            amplified_voltage = self.apply_freq_cutoff(amplified_voltage, self.high_cutoff_freq, time_delta)
 
         return time_array, amplified_voltage
 
@@ -55,7 +55,7 @@ class Amplifier:
         initial_value = voltage_in[0]
         initial_filter_state = np.array([initial_value * (1.0 - alpha)])
 
-        voltage_slow, _ = lfilter(
+        voltage_slow, _ = signal.lfilter(
             b=voltage_in_coefficient, 
             a=output_coefficients, 
             x=voltage_in, 
