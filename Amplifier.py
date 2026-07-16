@@ -3,7 +3,7 @@ import scipy.signal as signal
 
 class Amplifier:
     
-    def __init__(self, gain, gain_units, input_impedance, output_impedance, low_cutoff_freq = None, high_cutoff_freq = None):
+    def __init__(self, gain, gain_units, input_impedance, output_impedance, min_voltage_out, max_voltage_out, low_cutoff_freq = None, high_cutoff_freq = None):
         
         if gain_units.lower() == "db":
             self.gain = 10 ** (gain/20)
@@ -12,10 +12,15 @@ class Amplifier:
         else: 
             raise ValueError("Invalid gain unit. Use \"db\" or \"unitless\" ")
 
+        if min_voltage_out > max_voltage_out:
+            raise ValueError("max_voltage_out must be greater than min_voltage_out")
+
         self.low_cutoff_freq = low_cutoff_freq
         self.high_cutoff_freq = high_cutoff_freq
         self.input_impedance = input_impedance
         self.output_impedance = output_impedance
+        self.max_voltage_out = max_voltage_out
+        self.min_voltage_out = min_voltage_out
 
 
     def amplify(self, time_array, voltage_array, signal_baseline):
@@ -37,6 +42,8 @@ class Amplifier:
 
         if self.high_cutoff_freq is not None:
             amplified_voltage = self.apply_high_freq_cutoff(amplified_voltage, self.high_cutoff_freq, time_delta)
+
+        amplified_voltage = np.min(self.max_voltage_out, np.max(self.min_voltage_out, amplified_voltage))
 
         return time_array, amplified_voltage
 
