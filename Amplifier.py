@@ -6,7 +6,7 @@ import scipy.signal as signal
 
 class Amplifier:
     
-    def __init__(self, gain, gain_units, source_impedence, output_impedence, low_cutoff_freq = None, high_cutoff_freq = None):
+    def __init__(self, gain, gain_units, source_impedance, output_impedance, low_cutoff_freq = None, high_cutoff_freq = None):
         
         if gain_units.lower() == "db":
             self.gain = 10 ** (gain/20)
@@ -17,8 +17,8 @@ class Amplifier:
 
         self.low_cutoff_freq = low_cutoff_freq
         self.high_cutoff_freq = high_cutoff_freq
-        self.source_impedence = source_impedence
-        self.output_impedence = output_impedence
+        self.source_impedance = source_impedance
+        self.output_impedance = output_impedance
 
 
     def amplify(self, time_array, voltage_array, signal_baseline):
@@ -36,16 +36,16 @@ class Amplifier:
         amplified_voltage = amplified_voltage * self.gain
 
         if self.low_cutoff_freq is not None:
-            amplified_voltage = self.apply_freq_cutoff(amplified_voltage, self.low_cutoff_freq, time_delta)
+            amplified_voltage = self.apply_low_freq_cutoff(amplified_voltage, self.low_cutoff_freq, time_delta)
 
         if self.high_cutoff_freq is not None:
-            amplified_voltage = self.apply_freq_cutoff(amplified_voltage, self.high_cutoff_freq, time_delta)
+            amplified_voltage = self.apply_high_freq_cutoff(amplified_voltage, self.high_cutoff_freq, time_delta)
 
         return time_array, amplified_voltage
 
 
     @classmethod
-    def apply_freq_cutoff(cls, voltage_in, cutoff_frequency, time_delta):
+    def apply_high_freq_cutoff(cls, voltage_in, cutoff_frequency, time_delta):
         
         alpha = cls.get_alpha(time_delta = time_delta, frequency=cutoff_frequency)
 
@@ -55,14 +55,35 @@ class Amplifier:
         initial_value = voltage_in[0]
         initial_filter_state = np.array([initial_value * (1.0 - alpha)])
 
-        voltage_slow, _ = signal.lfilter(
+        filtered_voltage, _ = signal.lfilter(
             b=voltage_in_coefficient, 
             a=output_coefficients, 
             x=voltage_in, 
             zi=initial_filter_state
         )
         
-        return voltage_slow
+        return filtered_voltage
+
+
+    @classmethod
+    def apply_low_freq_cutoff(cls, voltage_in, cutoff_frequency, time_delta):
+        
+        alpha = cls.get_alpha(time_delta = time_delta, frequency=cutoff_frequency)
+
+        voltage_in_coefficient = [alpha]
+        output_coefficients = [1.0 , -(1.0 - alpha)]
+
+        initial_value = voltage_in[0]
+        initial_filter_state = np.array([initial_value * (1.0 - alpha)])
+
+        filtered_voltage, _ = signal.lfilter(
+            b=voltage_in_coefficient, 
+            a=output_coefficients, 
+            x=voltage_in, 
+            zi=initial_filter_state
+        )
+        
+        return voltage_in - filtered_voltage
             
     @classmethod
     def get_alpha(cls, time_delta, frequency):
