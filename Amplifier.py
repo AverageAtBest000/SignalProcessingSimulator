@@ -15,7 +15,7 @@ class Amplifier:
         if min_voltage_out > max_voltage_out:
             raise ValueError("max_voltage_out must be greater than min_voltage_out")
 
-        if low_cutoff_freq is not None and high_cutoff_freq is not none:
+        if low_cutoff_freq is not None and high_cutoff_freq is not None:
             if low_cutoff_freq > high_cutoff_freq:
                 raise ValueError("high_cutoff_freq must be greater than low_cutoff_freq")
 
@@ -57,7 +57,7 @@ class Amplifier:
             else:
                 raise ValueError("high_cutoff_freq must be less than the nyquist")
 
-        amplified_voltage = np.min(self.max_voltage_out, np.max(self.min_voltage_out, amplified_voltage))
+        amplified_voltage = np.clip(amplified_voltage, self.min_voltage_out, self.max_voltage_out)
 
         return time_array, amplified_voltage
 
