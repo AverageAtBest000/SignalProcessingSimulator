@@ -9,7 +9,7 @@ class Digitizer:
                  sampling_rate_Hz, num_bits, 
                  min_volts, max_volts, event_threshold = None,
                  polarity = None, pre_trigger_time = None,
-                 post_trigger_time = None):
+                 post_trigger_time = None, dc_offset = 0 ):
 
 
         if len(time_array)!= len(voltage_array):
@@ -38,7 +38,9 @@ class Digitizer:
 
         voltage_samples = cls.interpolate(time_array, voltage_array, discrete_times)
         
-        was_clipped = (voltage_samples > max_volts) | (voltage_samples <= min_volts) 
+        voltage_samples = voltage_samples + dc_offset 
+
+        was_clipped = (voltage_samples > max_volts) | (voltage_samples < min_volts) 
         clipped_voltage_samples = np.clip(voltage_samples, min_volts, max_volts)
         
         num_levels = 2 ** num_bits
