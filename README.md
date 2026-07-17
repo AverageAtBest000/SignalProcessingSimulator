@@ -2,18 +2,16 @@
 
 This project is to let an experimenter design/pre-plan a simulated signal and run it through cables, splitters, or amplifiers and seeing how much the signal reflects, distorts, or messes up before reaching the digitizer.
 __________________________________________________________________________________________________________________________________________
-FILES
+COMPUTER CLASSES
 
--Amplifier: code if the siimulated signal went through an amplifier
+| files | our code (python) | how if affects signal |
+|-------|-------------------|-----------------------|
+|Amplifier| This code is an amplifier class that'll amplify a simulated signal | Increases signal amplitude but can affect how fast the signal rises |
+|Cable| This code is a cable class that'll simulate a real cable for us to run our signal through | Delays signal times/reduces amplitude the longer the cable is |
+|Digitizer| This code is a digitizer class that'll turn a smooth signal into digital steps like a real analog digital converter | Electronic device that converts signals to digital data |
+|LeadingEdgeDiscriminator| This code is a LED class that'll find the moment that our signal will rise/fall on a certain level | Causes timing delays because it triggers at different moments (depending on signal size/noise level) |
+|SignalGenerator| This code is a signal generator class that'll create a realistic noisy PMT signal | This is the simulated signal
+|Splitter| This code is a splitter class that'll simulate a resistive splitter and divide one input signal into two output signals | Reduces a signals amplitude by half, but not changing the timing/shape
+|Terminators| This code is a terminator class that'll represent and control how much of a signal will bounce back | How much of the signal reflects back at the end |
 
--Digitizer: code that'll simulate how a smooth signal can be affect through cerain variables
-
--LeadingEdgeDiscriminator: code for leading edge discriminator, first code is before its in a class while the second code is when it is in a class
-
--SignalGenerator: code that'll generate simulated electrical signals for us to test our other codes on
-
--Splitter: code that'll calculate how the signal would split when it goes through a resistor
-
--Terminator: code that shows an echo of the original signal and mizing it back into the original signal
-
--Main: code that'll make a fake sensor signal that splits into two paths and plot them on a graph to compare them
+We put everything into classes to make our code more organized and neat rather than there being stacks on stacks of long code
