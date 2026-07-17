@@ -30,7 +30,7 @@ class Amplifier:
         self.min_voltage_out = min_voltage_out
 
 
-    def amplify(self, time_array, voltage_array, signal_baseline):
+    def amplify(self, time_array, voltage_array, signal_baseline, output_baseline = 0.0):
         
         if len(time_array) != len(voltage_array) or len(time_array) < 2:
             raise ValueError("voltage_array and time_array must be of equal length and have at least two samples")
@@ -56,6 +56,8 @@ class Amplifier:
                 amplified_voltage = self.apply_high_freq_cutoff(amplified_voltage, self.high_cutoff_freq, time_delta)
             else:
                 raise ValueError("high_cutoff_freq must be less than the nyquist")
+
+        amplified_voltage = amplified_voltage + output_baseline
 
         amplified_voltage = np.clip(amplified_voltage, self.min_voltage_out, self.max_voltage_out)
 
