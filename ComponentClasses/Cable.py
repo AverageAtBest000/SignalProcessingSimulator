@@ -22,18 +22,21 @@ class Cable:
             raise ValueError("attenuation_db_per_m must be finite and not negative")
 
 
-    def propagation(self, time_array, voltage_array, source_impedance, load_impedance, signal_baseline, max_round_trips):
+    def propagation(self, time_array, voltage_array, source_impedance, load_impedance, signal_baseline, max_round_trips, volts_in_is_open_circuit = True):
         
         pulse_voltage = voltage_array - signal_baseline
         delay = self.calculate_delay()
 
-        attenuation = self.get_atteniation()
+        attenuation = self.get_attenuation()
 
         load_reflection = self.get_reflection_coefficient(load_impedance)
 
         source_reflection = self.get_reflection_coefficient(source_impedance)
 
-        launch_factor = self.characteristic_impedance / (source_impedance + self.characteristic_impedance)
+        if input_voltage_is_open_circuit:
+            launch_factor = self.characteristic_impedance / (source_impedance + self.characteristic_impedance)
+        else:
+            launch_factor = 1.0
 
         launched_wave  = pulse_voltage * launch_factor
 
@@ -43,7 +46,7 @@ class Cable:
 
         output_voltage_change = np.zeros(len(voltage_array))
         
-        for round_trip in max_round_trips:
+        for round_trip in range(max_round_trips):
             
             if current_arrival_delay > time_array[-1]:
                 break
@@ -89,11 +92,14 @@ class Cable:
 
     def get_reflection_coefficient(self, impedance):
 
-        reflection_coefficient  = (impedance - self.characterist) / (impedance + self.characterist)
+        if np.isinf(impedance):
+            return 1.0
+
+        reflection_coefficient  = (impedance - self.characteristic_impedance) / (impedance + self.characteristic_impedance)
 
         return reflection_coefficient
 
-    def get_atteniation(self):
+    def get_attenuation(self):
         
         loss = self.attenuation_db_per_m * self.length_m
         atten_factor = 10 ** (- loss / 20)
@@ -104,7 +110,7 @@ class Cable:
     def delay_wave(self, time_array, voltage_array, delay):
 
         new_time_array = time_array - delay
-        delayed_wave = np.interp( x = new_time_array, xp = time_array, fp = voltage_array)
+        delayed_wave = np.interp( x = new_time_array, xp = time_array, fp = voltage_array, left = 0, right = 0)
 
         return delayed_wave
     
