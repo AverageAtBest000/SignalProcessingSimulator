@@ -5,12 +5,23 @@ class Cable:
     
     def __init__(self, characteristic_impedance, length_m, velocity_factor, attenuation_db_per_m):
 
+        self.validate_params(characteristic_impedance, length_m, velocity_factor, attenuation_db_per_m)
         self.characteristic_impedance = characteristic_impedance
         self.length_m = length_m
         self.velocity_factor = velocity_factor
         self.attenuation_db_per_m = attenuation_db_per_m
 
-    
+    def validate_constructor_params(self, characteristic_impedance, length_m, velocity_factor, attenuation_db_per_m):
+        if not np.isfinite(characteristic_impedance) or characteristic_impedance <= 0:
+            raise ValueError("characteristic_impedance must be finite and greater than zero")
+        if not np.isfinite(length_m) or length_m < 0:
+            raise ValueError("length_m must be finite and not negative")
+        if not np.isfinite(velocity_factor) or not 0 < velocity_factor <= 1:
+            raise ValueError("velocity_factor must be greater than zero and 1 >= ")
+        if not np.isfinite(attenuation_db_per_m) or attenuation_db_per_m < 0:
+            raise ValueError("attenuation_db_per_m must be finite and not negative")
+
+
     def propagation(self, time_array, voltage_array, source_impedance, load_impedance, signal_baseline, max_round_trips):
         
         pulse_voltage = voltage_array - signal_baseline
@@ -55,6 +66,19 @@ class Cable:
 
         return time_array, output_voltage
         pass
+
+    def validate_method_params(self, time_array, voltage_array, source_impedance, load_impedance, signal_baseline, max_round_trips):
+
+        if time_array.ndim != 1 or voltage_array.ndim != 1:
+            raise ValueError("time_array and voltage_array must be in 1D")
+        if len(time_array) != len(voltage_array) or len(time_array) < 2:
+            raise ValueError("time_array and voltage_array must be equal in length and contain at least two samples")
+        if not np.all(np.isfinite(time_array)) or not np.all(np.isfinite(voltage_array)):
+            raise ValueError("time_array and voltage_array must not contain infinite values")
+        if np.any(np.diff(time_array) <= 0):
+            raise ValueError("time_array must be increasing")
+        if not np.isfinite(signal_baseline):
+            raise ValueError("signal_baseline must be finite")
 
     def calculate_delay(self):
 

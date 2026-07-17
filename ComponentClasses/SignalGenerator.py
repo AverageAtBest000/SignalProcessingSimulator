@@ -35,12 +35,25 @@ class Generator:
             raise ValueError("unknown method or incorrect arguments detected")
 
     @classmethod
-    def get_PMT_signal(cls, expected_photoelectrons, time_array, t_0, Tao_fall, Tao_rise, Tao_fall_spe, Tao_rise_spe, polarity): 
+    def get_PMT_signal(cls, 
+                        expected_photoelectrons, 
+                        time_array, 
+                        t_0, 
+                        Tao_fall, 
+                        Tao_rise, 
+                        Tao_fall_spe, 
+                        Tao_rise_spe, 
+                        polarity, 
+                        SPE_pulse_area=8.0e-12, 
+                        relative_gain_sigma=0.2,
+                        random_seed=None):
+
         num_samples = len(time_array)
         dt = time_array[1] - time_array[0]
         
         signal = np.zeros(num_samples)
-        rng = np.random.default_rng()
+
+        rng = np.random.default_rng(random_seed)
         
         expected = cls.get_arrival_rate(expected_photoelectrons, cls.normalized_double_exponential(time_array, t_0, 
                                                                                                    Tao_fall, Tao_rise))
@@ -53,16 +66,15 @@ class Generator:
             #for every photon that arrived in that time step
             for photoelectron in range(photoelectron_arrivals[i]):
 
-                relative_gain = np.clip(rng.normal(1.0, 0.2),0, a_max=None)
+                relative_gain = np.clip(rng.normal(1.0, relative_gain_sigma), 0, a_max=None)
                 photoelectron_time = time_array[i]
 
                 signal += cls.get_photoelectron_voltage( polarity = polarity, 
-                                                         SPE_pulse_area = cls.set_pulse_area(method="direct", SPE_pulse_area=8.0e-12),
+                                                         SPE_pulse_area = cls.set_pulse_area(method="direct", SPE_pulse_area=SPE_pulse_area),
                                                          relative_gain = relative_gain,
                                                          double_exponential_SPE = cls.normalized_double_exponential(time_array = time_array, 
                                                                                                                      t_0 = photoelectron_time, 
                                                                                                                      Tao_fall = Tao_fall_spe, 
-                                                                                                                     Tao_rise = Tao_rise_spe )
-                                                        )
+                                                                                                                     Tao_rise = Tao_rise_spe ))
         return signal
         
