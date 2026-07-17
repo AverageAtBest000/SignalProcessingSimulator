@@ -5,7 +5,7 @@ class Cable:
     
     def __init__(self, characteristic_impedance, length_m, velocity_factor, attenuation_db_per_m):
 
-        self.validate_params(characteristic_impedance, length_m, velocity_factor, attenuation_db_per_m)
+        self.validate_constructor_params(characteristic_impedance, length_m, velocity_factor, attenuation_db_per_m)
         self.characteristic_impedance = characteristic_impedance
         self.length_m = length_m
         self.velocity_factor = velocity_factor
@@ -33,7 +33,7 @@ class Cable:
 
         source_reflection = self.get_reflection_coefficient(source_impedance)
 
-        if input_voltage_is_open_circuit:
+        if volts_in_is_open_circuit:
             launch_factor = self.characteristic_impedance / (source_impedance + self.characteristic_impedance)
         else:
             launch_factor = 1.0
