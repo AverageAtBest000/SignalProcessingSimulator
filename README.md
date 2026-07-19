@@ -18,7 +18,7 @@ We put everything into classes to make our code more organized and neat rather t
 
 
 
-##SignalGenerator.py
+## SignalGenerator.py
 
 The ```SignalGenerator.py``` file contains the ```Generator``` class. The ```Generator``` class contains the class method ```get_PMT_signal()``` wich returns a synthetic signal that is modeled after a photomultiplier tube signal. To do this, we used a double exponential, initially represented as:
 
@@ -32,11 +32,39 @@ $$
     f(t) =  \frac {e^{ \frac{-(t - t_0)}{ tau_f} } - e^{ \frac{-(t - t_0)}{ tau_r} }} { tau_f - tau_r} 
 $$
 
-This allowed for easier integration with out other components:
+Implemented in code as: 
 
-1. The normalized equation now yields units of $\frac{1}{s}$. Multiplying by a constant, A, with units representing the number of photoelectrons yields units of $\frac{PE}{s}$, a rate representing photoelectrons per second. This was not possible previously as $\int{f(t)} \neq 1$, disallowing A from representing the mean number of photoelectrons. 
+```Python
+def normalized_double_exponential(cls, time_array, t_0, Tao_fall, Tao_rise): 
+        raw_wave =  ( np.exp( -(time_array-t_0) / Tao_fall) - np.exp( -(time_array - t_0) / Tao_rise )  ) / (Tao_fall - Tao_rise)
+        return np.where(time_array >= t_0, raw_wave, 0)
+```
+where ```np.where(time_array >= t_0, raw_wave, 0)``` prevents the pulse from existing before the event begins. 
 
-2.
+
+``` get_arrival_rate()```  multiplies the normalized double exponential by ``` mean_number_photoelectons``` : 
+$$
+    \lambda(t) = N_{expected}f(t)
+$$ 
+
+This equation yields units of $\frac{PE}{s}$. Because $f(t)$ integrates to one :
+
+$$
+\int  \lambda(t) \,dt = N_{expected}
+$$
+
+*Function for arrival rate calculation*
+```python
+def get_arrival_rate(cls, mean_number_photoelectrons, scintillator_double_exponential ):
+        return mean_number_photoelectrons * scintillator_double_exponential
+```
+
+In ```get_PMT_singal()```, we then calculate the time delta between each time step, ```dt```. Multiplying the result of ```get_arrival_rate()``` by ```dt``` yields an array ```expected```, where ```expected[i]``` gives you the number of photoelectrons that are expected to arrive during time bin ```i```.
 
 
+The ```expected``` array is then used to draw from a poisson distribution in order to calculate the actual number of photoelectron arrivals at each time bin. 
+
+```Python
+        photoelectron_arrivals = rng.poisson(lam=expected, size=len(expected))
+```
 
