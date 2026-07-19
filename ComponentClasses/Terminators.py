@@ -21,7 +21,7 @@ class Terminator:
                         source_impedance,
                         signal_baseline, 
                         max_round_trips,
-                        input_voltage_is_open_circuit=True):
+                        volts_in_is_open_circuit=True):
 
         return cable.propagation(
             time_array=time_array,
@@ -30,5 +30,5 @@ class Terminator:
             load_impedance=self.impedance,
             signal_baseline=signal_baseline,
             max_round_trips=max_round_trips,
-            input_voltage_is_open_circuit=input_voltage_is_open_circuit,
+            volts_in_is_open_circuit = volts_in_is_open_circuit
         )

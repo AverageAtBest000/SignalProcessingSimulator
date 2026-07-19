@@ -1,7 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from SignalGenerator import Generator
-from Splitter import Splitter
+from ComponentClasses import (  Amplifier, 
+                                Digitizer, 
+                                Cable,
+                                Generator,
+                                Terminator, 
+                                Splitter, 
+                                EdgeDiscriminator)
+
+
 
 generator = Generator()
 splitter = Splitter(16.5, 16.5, 16.5)
