@@ -15,3 +15,28 @@ COMPUTER CLASSES
 |Terminators| This code is a terminator class that'll represent and control how much of a signal will bounce back | How much of the signal reflects back at the end |
 
 We put everything into classes to make our code more organized and neat rather than there being stacks on stacks of long code
+
+
+
+##SignalGenerator.py
+
+The ```SignalGenerator.py``` file contains the ```Generator``` class. The ```Generator``` class contains the class method ```get_PMT_signal()``` wich returns a synthetic signal that is modeled after a photomultiplier tube signal. To do this, we used a double exponential, initially represented as:
+
+$$
+    f(t) = e^{ \frac{-(t - t_0)}{ tau_f} } - e^{ \frac{-(t - t_0)}{ tau_r} } 
+$$
+
+The generator was later modified to use the normalized function :
+
+$$
+    f(t) =  \frac {e^{ \frac{-(t - t_0)}{ tau_f} } - e^{ \frac{-(t - t_0)}{ tau_r} }} { tau_f - tau_r} 
+$$
+
+This allowed for easier integration with out other components:
+
+1. The normalized equation now yields units of $\frac{1}{s}$. Multiplying by a constant, A, with units representing the number of photoelectrons yields units of $\frac{PE}{s}$, a rate representing photoelectrons per second. This was not possible previously as $\int{f(t)} \neq 1$, disallowing A from representing the mean number of photoelectrons. 
+
+2.
+
+
+
