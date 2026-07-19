@@ -43,6 +43,7 @@ where ```np.where(time_array >= t_0, raw_wave, 0)``` prevents the pulse from exi
 
 
 ``` get_arrival_rate()```  multiplies the normalized double exponential by ``` mean_number_photoelectons``` : 
+
 $$
     \lambda(t) = N_{expected}f(t)
 $$ 
