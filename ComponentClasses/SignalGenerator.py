@@ -7,8 +7,10 @@ class Generator:
     """============ Methods for simulation of PMT signal with scintillator=============="""
 
 
-    def __init__(self, output_inpedance = 50.0):
-        sef.output_impedance = output_inpedance
+    def __init__(self, output_impedance = 50.0):
+        if not np.isfinite(output_impedance) or output_impedance <= 0:
+            raise ValueError("output_impedance must be finite and greater than zero")
+        self.output_impedance = output_impedance
 
     @classmethod
     @deprecated("use normalized_double_exponential(), get_arival_rate() instead")
@@ -27,6 +29,10 @@ class Generator:
                 
     @classmethod
     def get_photoelectron_voltage(cls, polarity, SPE_pulse_area, relative_gain, double_exponential_SPE):
+        if polarity not in (-1, 1):
+            raise ValueError("polarity must be -1 for a negative pulse or 1 for a positive pulse")
+        if SPE_pulse_area < 0:
+            raise ValueError("SPE_pulse_area must be a non-negative pulse-area magnitude")
         return polarity * SPE_pulse_area * relative_gain * double_exponential_SPE 
 
     @classmethod
@@ -48,18 +54,22 @@ class Generator:
                         Tao_rise, 
                         Tao_fall_spe, 
                         Tao_rise_spe, 
-                        polarity, 
+                        polarity = -1,
                         SPE_pulse_area=8.0e-12, 
                         relative_gain_sigma=0.2,
                         random_seed=None,
                         pulse_area_method = "direct",
                         terminator_resistance = None,
-                        PMT_gain = None):
+                        PMT_gain = None,
+                        baseline_voltage = 0.0):
 
         num_samples = len(time_array)
         dt = time_array[1] - time_array[0]
         
-        signal = np.zeros(num_samples)
+        if not np.isfinite(baseline_voltage):
+            raise ValueError("baseline_voltage must be finite")
+
+        signal = np.full(num_samples, baseline_voltage, dtype=float)
 
         rng = np.random.default_rng(random_seed)
         

@@ -3,6 +3,10 @@ import numpy as np
 class EdgeDiscriminator:
 
     def __init__(self, threshold, polarity):
+        if not np.isfinite(threshold):
+            raise ValueError("threshold must be a finite voltage")
+        if polarity not in (-1, 1):
+            raise ValueError("polarity must be -1 for a negative pulse or 1 for a positive pulse")
         self.threshold = threshold
         self.polarity = polarity
 

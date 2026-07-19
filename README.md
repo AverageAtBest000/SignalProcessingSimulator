@@ -1,6 +1,16 @@
 # Signal Processing Simulator
 
 This project is to let an experimenter design/pre-plan a simulated signal and run it through cables, splitters, or amplifiers and seeing how much the signal reflects, distorts, or messes up before reaching the digitizer.
+
+## Voltage convention
+
+- Every voltage array contains signed physical voltage values in volts.
+- A PMT anode pulse is negative-going by default, so its pulse voltage is below its baseline. Pass `polarity=-1` for this conventional PMT output or `polarity=1` for a positive-going source.
+- Pulse area is a non-negative magnitude. `polarity`, rather than the sign of `SPE_pulse_area`, determines the pulse direction.
+- `signal_baseline` and `baseline_voltage` are absolute voltage levels. Components subtract the input baseline before changing the pulse and add the baseline back afterward.
+- Discriminator thresholds are signed voltages. For example, use a negative threshold with `polarity=-1` for a negative PMT pulse.
+- Digitizer `min_volts`, `max_volts`, and `dc_offset` are all in volts. The DC offset is added before clipping and quantization.
+
 __________________________________________________________________________________________________________________________________________
 COMPUTER CLASSES
 

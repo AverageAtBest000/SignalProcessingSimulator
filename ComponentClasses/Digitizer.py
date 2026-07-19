@@ -21,6 +21,18 @@ class Digitizer:
         if not np.all(np.isfinite(time_array)) or not np.all(np.isfinite(voltage_array)): 
             raise ValueError("time_array and voltage_array must contain only finite values")
 
+        if not np.isfinite(sampling_rate_Hz) or sampling_rate_Hz <= 0:
+            raise ValueError("sampling_rate_Hz must be finite and greater than zero")
+
+        if not isinstance(num_bits, (int, np.integer)) or num_bits <= 0:
+            raise ValueError("num_bits must be a positive integer")
+
+        if not np.isfinite(min_volts) or not np.isfinite(max_volts) or min_volts >= max_volts:
+            raise ValueError("min_volts and max_volts must be finite, with min_volts less than max_volts")
+
+        if not np.isfinite(dc_offset):
+            raise ValueError("dc_offset must be finite")
+
         unimplemented = (event_threshold, polarity, pre_trigger_time, post_trigger_time)
         for param in unimplemented:
             if param is not None:  
