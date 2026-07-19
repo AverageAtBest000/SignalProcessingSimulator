@@ -6,6 +6,11 @@ class Generator:
     
     """============ Methods for simulation of PMT signal with scintillator=============="""
 
+
+    def __init__(self, output_inpedance = 50.0):
+        sef.output_impedance = output_inpedance
+
+    @classmethod
     @deprecated("use normalized_double_exponential(), get_arival_rate() instead")
     def get_double_exponential(cls, num_photoelectrons, T, t_0, Tao_fall, Tao_rise):
         raw_wave =  num_photoelectrons / (Tao_fall - Tao_rise) * ( np.exp(-(T-t_0)/Tao_fall) - np.exp( -(T-t_0)/Tao_rise )  )
