@@ -46,7 +46,10 @@ class Generator:
                         polarity, 
                         SPE_pulse_area=8.0e-12, 
                         relative_gain_sigma=0.2,
-                        random_seed=None):
+                        random_seed=None,
+                        pulse_area_method = "direct",
+                        terminator_resistance = None,
+                        PMT_gain = None):
 
         num_samples = len(time_array)
         dt = time_array[1] - time_array[0]
@@ -70,7 +73,7 @@ class Generator:
                 photoelectron_time = time_array[i]
 
                 signal += cls.get_photoelectron_voltage( polarity = polarity, 
-                                                         SPE_pulse_area = cls.set_pulse_area(method="direct", SPE_pulse_area=SPE_pulse_area),
+                                                         SPE_pulse_area = cls.set_pulse_area(method=pulse_area_method, SPE_pulse_area=SPE_pulse_area, termination_resistance=terminator_resistance, PMT_gain=PMT_gain),
                                                          relative_gain = relative_gain,
                                                          double_exponential_SPE = cls.normalized_double_exponential(time_array = time_array, 
                                                                                                                      t_0 = photoelectron_time, 
