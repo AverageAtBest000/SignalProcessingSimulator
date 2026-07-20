@@ -22,8 +22,18 @@ class Cable:
             raise ValueError("attenuation_db_per_m must be finite and not negative")
 
 
-    def propagation(self, time_array, voltage_array, source_impedance, load_impedance, signal_baseline, max_round_trips, volts_in_is_open_circuit = True):
+    def propagation(self, time_array, open_circuit_voltage_array, source_impedance, load_impedance, signal_baseline, max_round_trips):
         
+
+        self.validate_method_params(
+            time_array,
+            open_circuit_voltage_array,
+            source_impedance,
+            load_impedance,
+            signal_baseline,
+            max_round_trips
+        )
+
         pulse_voltage = voltage_array - signal_baseline
         delay = self.calculate_delay()
 
@@ -33,10 +43,8 @@ class Cable:
 
         source_reflection = self.get_reflection_coefficient(source_impedance)
 
-        if volts_in_is_open_circuit:
-            launch_factor = self.characteristic_impedance / (source_impedance + self.characteristic_impedance)
-        else:
-            launch_factor = 1.0
+        launch_factor = self.characteristic_impedance / (source_impedance + self.characteristic_impedance)
+
 
         launched_wave  = pulse_voltage * launch_factor
 
@@ -65,9 +73,9 @@ class Cable:
 
             current_arrival_delay = current_arrival_delay + (2 * delay)
 
-        output_voltage = signal_baseline + output_voltage_change
+        loaded_output_voltage = signal_baseline + output_voltage_change
 
-        return time_array, output_voltage
+        return time_array, loaded_output_voltage
         pass
 
     def validate_method_params(self, time_array, voltage_array, source_impedance, load_impedance, signal_baseline, max_round_trips):
