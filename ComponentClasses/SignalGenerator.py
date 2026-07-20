@@ -7,8 +7,8 @@ class Generator:
     """============ Methods for simulation of PMT signal with scintillator=============="""
 
 
-    def __init__(self, output_inpedance = 50.0):
-        sef.output_impedance = output_inpedance
+    def __init__(self, output_impedance = 50.0):
+        self.output_impedance = output_impedance
 
     @classmethod
     @deprecated("use normalized_double_exponential(), get_arival_rate() instead")
@@ -39,22 +39,30 @@ class Generator:
         else:
             raise ValueError("unknown method or incorrect arguments detected")
 
-    @classmethod
-    def get_PMT_signal(cls, 
-                        expected_photoelectrons, 
-                        time_array, 
-                        t_0, 
-                        Tao_fall, 
-                        Tao_rise, 
-                        Tao_fall_spe, 
-                        Tao_rise_spe, 
-                        polarity, 
-                        SPE_pulse_area=8.0e-12, 
-                        relative_gain_sigma=0.2,
-                        random_seed=None,
-                        pulse_area_method = "direct",
-                        terminator_resistance = None,
-                        PMT_gain = None):
+
+    def convert_to_open_circuit_pulse_area(self, measured_pulse_area, measurement_impedance):
+        return measured_pulse_area * ( (self.output_impedance + measurement_impedance) / measurement_impedance)
+
+
+    def get_PMT_signal( 
+        self, 
+        expected_photoelectrons, 
+        time_array, 
+        t_0, 
+        Tao_fall, 
+        Tao_rise, 
+        Tao_fall_spe, 
+        Tao_rise_spe, 
+        polarity, 
+        SPE_pulse_area=8.0e-12, 
+        relative_gain_sigma=0.2,
+        random_seed=None,
+        pulse_area_method = "direct",
+        terminator_resistance = None,
+        PMT_gain = None,
+        SPE_pulse_area_is_open_circuit = False,
+        measurement_impedance = None
+    ):
 
         num_samples = len(time_array)
         dt = time_array[1] - time_array[0]
@@ -68,6 +76,7 @@ class Generator:
         expected = np.clip(expected, 0, None) * dt
         photoelectron_arrivals = rng.poisson(lam=expected, size=len(expected))
         
+        pulse_area = self.set_pulse_area(method=pulse_area_method, SPE_pulse_area = SPE_pulse_area, )
         # for every time step
         for i in range(len(photoelectron_arrivals)):
             
