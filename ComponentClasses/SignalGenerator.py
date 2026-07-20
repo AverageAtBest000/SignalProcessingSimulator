@@ -113,4 +113,6 @@ class Generator:
                     )
                 )
 
+        return signal            
+
         

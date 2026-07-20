@@ -34,7 +34,7 @@ class Cable:
             max_round_trips
         )
 
-        pulse_voltage = voltage_array - signal_baseline
+        pulse_voltage = open_circuit_voltage_array - signal_baseline
         delay = self.calculate_delay()
 
         attenuation = self.get_attenuation()
@@ -52,7 +52,7 @@ class Cable:
 
         current_arrival_delay = delay
 
-        output_voltage_change = np.zeros(len(voltage_array))
+        output_voltage_change = np.zeros(len(open_circuit_voltage_array))
         
         for round_trip in range(max_round_trips):
             
