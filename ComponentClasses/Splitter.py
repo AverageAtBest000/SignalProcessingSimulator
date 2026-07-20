@@ -1,24 +1,46 @@
 
 """Ideal resistor model- add cable delay, reflections, capacitance, etc. later on"""
+from pyclbr import Class
+
+
 class Splitter:
     def __init__(self, R1, R2, R3):
         self.R1 = R1
         self.R2 = R2
         self.R3 = R3
         
-    def split( self, time_array, volts_array, load_1_impedance, load_2_impedance, source_impedance ):
-        if len(time_array) != len(volts_array):
+    @classmethod 
+    def get_parallel_impedance(cls, impedance_1, impedance_2):
+        
+        if np.isinf(impedance_1):
+            return impedance_2
+        if np.isinf(impedance_2):
+            return impedance_1
+
+        return(impedance_1*impedance_2/ (impedance_1 + impedance_2))
+    
+
+    @classmethod
+    def voltage_divider( cls, open_circuit_voltage_array, series_impedance, load_impedance ):
+        
+        if np.isinf(load_impedance):
+            return open_circuit_voltage_array
+
+        return open_circuit_voltage_array * ( load_impedance / (series_impedance + load_impedance) )
+    
+    
+    def split( self, time_array, open_volts_array, load_1_impedance, load_2_impedance, source_impedance, signal_baseline = 0.0 ):
+        
+        if len(time_array) != len(open_volts_array):
             raise ValueError("Time and Voltage array must be equal in length")
             
         branch_1_impedance = self.R2 + load_1_impedance
         branch_2_impedance = self.R3 + load_2_impedance
         
-        parallel_impedance = (branch_1_impedance * branch_2_impedance) / (branch_1_impedance + branch_2_impedance)
-        
-        v_node = volts_array * (parallel_impedance / (source_impedance + self.R1 + parallel_impedance))
-        
-        v_out1 = v_node * (load_1_impedance / branch_1_impedance)
-        v_out2 = v_node * (load_2_impedance / branch_2_impedance)
-        
-        return time_array, v_out1, v_out2
+        open_circuit_output_1 = ( signal_baseline + self.voltage_divider( pulse_voltage, source_side_impedance, branch_2_impedance ) )
+        output_impedance_1 = (self.R2 + self.parallel_impedance( source_side_impedance, branch_2_impedance) )
 
+        open_circuit_output_2 = ( signal_baseline + self.voltage_divider( pulse_voltage, source_side_impedance, branch_1_impedance) )
+        output_impedance_2 = ( self.R3 + self.parallel_impedance( source_side_impedance, branch_1_impedance ) )
+
+        return ( time_array, open_circuit_output_1, output_impedance_1, open_circuit_output_2, output_impedance_2 )
