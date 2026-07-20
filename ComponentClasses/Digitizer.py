@@ -4,6 +4,9 @@ import numpy as np
 class Digitizer:
     """ Add event_threshold , polarity , pre_trigger_time , post_trigger_time later """
     
+    def __init__(self, input_impedance=50.0):
+        self.input_impedance = input_impedance
+
     @classmethod
     def digitize(cls, time_array, voltage_array, 
                  sampling_rate_Hz, num_bits, 

@@ -7,3 +7,4 @@ from .LeadingEdgeDiscriminator import EdgeDiscriminator
 from .Splitter import Splitter
 from .Terminators import Terminator
 from .SignalGenerator import Generator
+from .Connector import Connector

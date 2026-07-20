@@ -71,7 +71,7 @@ class Generator:
 
         rng = np.random.default_rng(random_seed)
         
-        expected = cls.get_arrival_rate(expected_photoelectrons, cls.normalized_double_exponential(time_array, t_0, 
+        expected = self.get_arrival_rate(expected_photoelectrons, self.normalized_double_exponential(time_array, t_0, 
                                                                                                    Tao_fall, Tao_rise))
         expected = np.clip(expected, 0, None) * dt
         photoelectron_arrivals = rng.poisson(lam=expected, size=len(expected))

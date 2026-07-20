@@ -2,9 +2,10 @@ import numpy as np
 
 class EdgeDiscriminator:
 
-    def __init__(self, threshold, polarity):
+    def __init__(self, threshold, polarity, input_impedance):
         self.threshold = threshold
         self.polarity = polarity
+        self.input_impedance = input_impedance
 
     def apply(self, time_array, signal_array):
 
