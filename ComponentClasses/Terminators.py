@@ -17,7 +17,7 @@ class Terminator:
     def apply_reflection(self, 
                         cable, 
                         time_array, 
-                        voltage_array, 
+                        open_circuit_voltage_array, 
                         source_impedance,
                         signal_baseline, 
                         max_round_trips,
@@ -25,7 +25,7 @@ class Terminator:
 
         return cable.propagation(
             time_array=time_array,
-            voltage_array=voltage_array,
+            open_circuit_voltage_array=open_circuit_voltage_array,
             source_impedance=source_impedance,
             load_impedance=self.impedance,
             signal_baseline=signal_baseline,
