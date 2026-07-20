@@ -30,10 +30,10 @@ class Amplifier:
         self.min_voltage_out = min_voltage_out
 
 
-    def amplify(self, time_array, voltage_array, signal_baseline, output_baseline = 0.0):
+    def amplify(self, time_array, loaded_voltage_array, signal_baseline, output_baseline = 0.0):
         
-        if len(time_array) != len(voltage_array) or len(time_array) < 2:
-            raise ValueError("voltage_array and time_array must be of equal length and have at least two samples")
+        if len(time_array) != len(loaded_voltage_array) or len(time_array) < 2:
+            raise ValueError("loaded_voltage_array and time_array must be of equal length and have at least two samples")
 
         time_delta = time_array[1] - time_array[0]
 
@@ -41,7 +41,7 @@ class Amplifier:
         
         nyquist_frequency = sampling_frequency / 2
 
-        amplified_voltage = voltage_array - signal_baseline
+        amplified_voltage = loaded_voltage_array - signal_baseline
         
         amplified_voltage = amplified_voltage * self.gain
 
@@ -57,11 +57,11 @@ class Amplifier:
             else:
                 raise ValueError("high_cutoff_freq must be less than the nyquist")
 
-        amplified_voltage = amplified_voltage + output_baseline
+        open_circuit_amplified_voltage = amplified_voltage + output_baseline
 
-        amplified_voltage = np.clip(amplified_voltage, self.min_voltage_out, self.max_voltage_out)
+        open_circuit_amplified_voltage = np.clip(open_circuit_amplified_voltage, self.min_voltage_out, self.max_voltage_out)
 
-        return time_array, amplified_voltage
+        return time_array, open_circuit_amplified_voltage
 
 
     @classmethod
