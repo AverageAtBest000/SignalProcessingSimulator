@@ -76,8 +76,22 @@ class Generator:
         expected = np.clip(expected, 0, None) * dt
         photoelectron_arrivals = rng.poisson(lam=expected, size=len(expected))
         
-        pulse_area = self.set_pulse_area(method=pulse_area_method, SPE_pulse_area = SPE_pulse_area, )
-        # for every time step
+        pulse_area = self.set_pulse_area(method = pulse_area_method, SPE_pulse_area = SPE_pulse_area, termination_resistance = terminator_resistance, PMT_gain = PMT_gain)        
+        
+
+        if not SPE_pulse_area_is_open_circuit:
+           
+           if measurement_impedance is None:
+               
+               if pulse_area_method.lower() == "estimate_from_g_r":
+                   measurement_impedance = terminator_resistance
+               else:
+                   measurement_impedance = 50.0
+           
+           pulse_area = self.convert_to_open_circuit_pulse_area( measured_pulse_area=pulse_area, measurement_impedance=measurement_impedance)
+
+
+        #for every time step
         for i in range(len(photoelectron_arrivals)):
             
             #for every photon that arrived in that time step
@@ -86,12 +100,17 @@ class Generator:
                 relative_gain = np.clip(rng.normal(1.0, relative_gain_sigma), 0, a_max=None)
                 photoelectron_time = time_array[i]
 
-                signal += cls.get_photoelectron_voltage( polarity = polarity, 
-                                                         SPE_pulse_area = cls.set_pulse_area(method=pulse_area_method, SPE_pulse_area=SPE_pulse_area, termination_resistance=terminator_resistance, PMT_gain=PMT_gain),
-                                                         relative_gain = relative_gain,
-                                                         double_exponential_SPE = cls.normalized_double_exponential(time_array = time_array, 
-                                                                                                                     t_0 = photoelectron_time, 
-                                                                                                                     Tao_fall = Tao_fall_spe, 
-                                                                                                                     Tao_rise = Tao_rise_spe ))
-        return signal
+                signal += self.get_photoelectron_voltage(
+                    polarity = polarity,
+                    SPE_pulse_area = pulse_area,
+                    relative_gain = relative_gain,
+                    double_exponential_SPE = ( self.normalized_double_exponential(
+                                                    time_array=time_array,
+                                                    t_0=photoelectron_time,
+                                                    Tao_fall=Tao_fall_spe,
+                                                    Tao_rise=Tao_rise_spe
+                                                    )
+                    )
+                )
+
         
