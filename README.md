@@ -13,6 +13,8 @@ COMPUTER CLASSES
 |SignalGenerator| This code is a signal generator class that'll create a realistic noisy PMT signal | This is the simulated signal
 |Splitter| This code is a splitter class that'll simulate a resistive splitter and divide one input signal into two output signals | Reduces a signals amplitude by half, but not changing the timing/shape
 |Terminators| This code is a terminator class that'll represent and control how much of a signal will bounce back | How much of the signal reflects back at the end |
+|Connectors| This code is a connector class that calculates how much voltage decreases from a signal when its plugged into a circuit | Messes up signals peak voltage and sometimes completely flatten/distorts the pule |
+|init| This code has all the classes we created in one place so we are able to import and use them for our signal |
 
 We put everything into classes to make our code more organized and neat rather than there being stacks on stacks of long code
 
