@@ -1,7 +1,7 @@
 
 from .Amplifier import Amplifier
 from .Cable import Cable
-#from .ConstantFractionDiscriminator import ConstantFractionDiscriminator
+from .ConstantFractionDiscriminator import ConstantFractionDiscriminator
 from .Digitizer import Digitizer
 from .LeadingEdgeDiscriminator import EdgeDiscriminator
 from .Splitter import Splitter
