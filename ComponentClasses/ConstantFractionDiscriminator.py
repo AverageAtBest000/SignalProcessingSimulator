@@ -8,8 +8,9 @@ class ConstantFractionDiscriminator:
         
         self.attenuation = attenuation
         self.delay = delay
+        self.armed_threshold = armed_threshold
 
-    def apply(self, time_array: np.ndarray, open_circuit_voltage_array: np.ndarray, signal_baseline: float) -> tuple[np.ndarray, np.ndarray]:
+    def apply(self, time_array: np.ndarray, open_circuit_voltage_array: np.ndarray, signal_baseline: float, polarity:float) -> tuple[np.ndarray, np.ndarray]:
 
         removed_baseline_array  = open_circuit_voltage_array - signal_baseline
 
@@ -28,19 +29,49 @@ class ConstantFractionDiscriminator:
 
         crossing_times = np.array([])
         crossing_indexes = np.array([])
+        
         armed = False
+        
         for i in range(len(summed_array)):
             
-            if(removed_baseline_array[i] > armed_treshold):
+            if (not armed) and (self.is_over_armed_threshold(polarity, self.armed_threshold, summed_array[i])):
                 armed = True
-            else:
-                armed = False
             
-            if armed and (summed_array[i-1] < 0 and summed_array[i] >=0):
-                crossing_time = np.interp(0, summed_array, time_array)
+            if armed and self.has_crossed(polarity, summed_array[i-1], summed_array[i-1]):
                 
-                np.append(crossing_times, crossing_time)
-                np.append(cossing_indexes, i)
+                time_list = np.array([time_array[i-1], time_array[1]])
+                voltage_list = np.array([summed_array[i-1], summed_array[1]])
+
+                crossing_time = np.interp(0, voltage_list, time_list)
+                
+                crossing_times = np.append(crossing_times, crossing_time)
+                crossing_indexes =  np.append(crossing_indexes, i)
+
+                armed = False
 
 
         return crossing_indexes, crossing_times
+
+    
+    def has_crossed(self, polarity, num1, num2):
+
+        if polarity == -1 and (num1 < 0 and num2 >=0):
+            return True
+        elif polarity == 1 and (num1 >= 0 and num2 < 0):
+            return True
+
+        return False
+
+    
+    def is_over_armed_threshold(self, polarity, armed_threshold, num):
+        
+        
+        if(polarity == -1):
+            if(num >= armed_threshold):
+                return True
+        else:
+            if(num <= -armed_threshold):
+                return True
+
+        return False
+
