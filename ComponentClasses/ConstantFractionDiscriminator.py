@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy._core.fromnumeric import _0D
 
 
 class ConstantFractionDiscriminator:
@@ -20,10 +21,10 @@ class ConstantFractionDiscriminator:
 
         delayed_time_array = time_array - self.delay
         # delayed_time_array = np.clip(delayed_time_array, signal_baseline, max = None)
-        negative_time_indexes = np.where(delayed_time_array < 0)[0]
+        unavailable_time_array = np.where(delayed_time_array < time_array[0])[0]
 
         delayed_voltage_array = np.interp(delayed_time_array, time_array, removed_baseline_array)
-        delayed_voltage_array[negative_time_indexes] = signal_baseline
+        delayed_voltage_array[unavailable_time_array] = 0
 
         summed_array = delayed_voltage_array + attenuated_array
 
@@ -31,23 +32,35 @@ class ConstantFractionDiscriminator:
         crossing_indexes = np.array([])
         
         armed = False
-        
-        for i in range(len(summed_array)):
+        waiting_for_reset = False 
+
+        for i in range(1, len(summed_array)):
             
+            if waiting_for_reset:
+                
+                if not self.is_over_armed_threshold( polarity, self.armed_threshold, removed_baseline_array[i]):
+                    waiting_for_reset = False
+
+                continue
+
+
             if (not armed) and (self.is_over_armed_threshold(polarity, self.armed_threshold, summed_array[i])):
                 armed = True
-            
-            if armed and self.has_crossed(polarity, summed_array[i-1], summed_array[i-1]):
-                
-                time_list = np.array([time_array[i-1], time_array[1]])
-                voltage_list = np.array([summed_array[i-1], summed_array[1]])
 
-                crossing_time = np.interp(0, voltage_list, time_list)
+
+            if armed and self.has_crossed(polarity, summed_array[i-1], summed_array[i]):
                 
+                voltage_change = summed_array[i] - summed_array[i - 1]
+
+                crossing_fraction = ( 0 - summed_array[i - 1] ) / voltage_change
+
+                crossing_time = time_array[i - 1] + crossing_fraction * (time_array[i] - time_array[i - 1]) 
+
                 crossing_times = np.append(crossing_times, crossing_time)
-                crossing_indexes =  np.append(crossing_indexes, i)
+                crossing_indexes = np.append(i)
 
                 armed = False
+                waiting_for_reset = False
 
 
         return crossing_indexes, crossing_times
@@ -55,9 +68,9 @@ class ConstantFractionDiscriminator:
     
     def has_crossed(self, polarity, num1, num2):
 
-        if polarity == -1 and (num1 < 0 and num2 >=0):
+        if polarity == -1 and (num1 > 0 and num2 <=0):
             return True
-        elif polarity == 1 and (num1 >= 0 and num2 < 0):
+        elif polarity == 1 and (num1 < 0 and num2 >= 0):
             return True
 
         return False
@@ -67,10 +80,10 @@ class ConstantFractionDiscriminator:
         
         
         if(polarity == -1):
-            if(num >= armed_threshold):
+            if(num <= -armed_threshold):
                 return True
         else:
-            if(num <= -armed_threshold):
+            if(num >= armed_threshold):
                 return True
 
         return False
