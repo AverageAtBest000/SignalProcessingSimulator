@@ -2,9 +2,9 @@ import numpy as np
 import scipy.signal as signal
 
 class Amplifier:
-    
+    #saturating upper/lower can extend signals
     def __init__(self, gain, gain_units, input_impedance, output_impedance, min_voltage_out, max_voltage_out, low_cutoff_freq = None, high_cutoff_freq = None):
-        
+    # just use unitless
         if gain_units.lower() == "db":
             self.gain = 10 ** (gain/20)
         elif gain_units.lower() == "unitless":
@@ -31,7 +31,7 @@ class Amplifier:
 
 
     def amplify(self, time_array, loaded_voltage_array, signal_baseline, output_baseline = 0.0):
-        
+    # some of this only aplies to RF signal
         if len(time_array) != len(loaded_voltage_array) or len(time_array) < 2:
             raise ValueError("loaded_voltage_array and time_array must be of equal length and have at least two samples")
 

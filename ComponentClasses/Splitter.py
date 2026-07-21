@@ -34,7 +34,7 @@ class Splitter:
             raise ValueError("Time and Voltage array must be equal in length")
 
         pulse_voltage = open_volts_array  - signal_baseline
-
+        #assume cable offers no imp.
         source_side_impedance =  source_impedance + self.R1
 
         branch_1_impedance = self.R2 + load_1_impedance

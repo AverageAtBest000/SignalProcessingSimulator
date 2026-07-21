@@ -3,7 +3,7 @@ import scipy.constants as constants
 
 class Cable:
     
-    def __init__(self, characteristic_impedance, length_m, velocity_factor, attenuation_db_per_m):
+    def __init__(self, length_m, velocity_factor, attenuation_db_per_m, characteristic_impedance = 50.0):
 
         self.validate_constructor_params(characteristic_impedance, length_m, velocity_factor, attenuation_db_per_m)
         self.characteristic_impedance = characteristic_impedance

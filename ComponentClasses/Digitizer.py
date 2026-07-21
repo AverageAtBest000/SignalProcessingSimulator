@@ -38,7 +38,7 @@ class Digitizer:
         num_periods = int(np.floor(np.nextafter(num_periods, np.inf)))
 
         discrete_times = t_0 + np.arange(num_periods + 1 ) * sample_period 
-
+        #interpolation may not be the way - document this
         voltage_samples = cls.interpolate(time_array, voltage_array, discrete_times)
         
         voltage_samples = voltage_samples + dc_offset 
