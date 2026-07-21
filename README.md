@@ -11,7 +11,7 @@ COMPUTER CLASSES
 |Digitizer| This code is a digitizer class that'll turn a smooth signal into digital steps like a real analog digital converter | Electronic device that converts signals to digital data |
 |LeadingEdgeDiscriminator| This code is a LED class that'll find the moment that our signal will rise/fall on a certain level | Causes timing delays because it triggers at different moments (depending on signal size/noise level) |
 |SignalGenerator| This code is a signal generator class that'll create a realistic noisy PMT signal | This is the simulated signal
-|Splitter| This code is a splitter class that'll simulate a resistive splitter and divide one input signal into two output signals | Reduces a signals amplitude by half, but not changing the timing/shape
+|Splitter| This code is a splitter class that'll simulate a resistive splitter and divide one input signal into two or more output signals (what you choose) | Reduces a signals amplitude by half, but not changing the timing/shape
 |Terminators| This code is a terminator class that'll represent and control how much of a signal will bounce back | How much of the signal reflects back at the end |
 |Connectors| This code is a connector class that calculates how much voltage decreases from a signal when its plugged into a circuit | Messes up signals peak voltage and sometimes completely flatten/distorts the pule |
 |init| This code has all the classes we created in one place so we are able to import and use them for our signal |
@@ -81,6 +81,6 @@ A for loop is then used to sum the signal produced by each photoelectron at each
 * ```double_exponential_SPE``` is passed in using the ```normalized_double_exponential``` function with ```Tao_fall``` and ```Tao_rise``` set using their respective spe values and ```t_0``` set to the time when the photoelectron arrived. 
 
 
-## Digintizer.py
+## Digitizer.py
 
 The ```SignalGenerator.py``` file contains the ```Generator``` class. The ```Generator``` class contains the class method ```get_PMT_signal()``` wich returns a synthetic signal that is modeled after a photomultiplier tube signal. To do this, we used a double exponential, initially represented as:
