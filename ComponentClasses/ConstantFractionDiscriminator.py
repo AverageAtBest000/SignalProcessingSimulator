@@ -1,15 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy._core.fromnumeric import _0D
-
 
 class ConstantFractionDiscriminator:
     
-    def __init__(self, attenuation:float = None, delay:float = None, armed_threshold:float = None):
+    def __init__(self, attenuation:float = None, delay:float = None, armed_threshold:float = None, input_impedance:float = None):
         
         self.attenuation = attenuation
         self.delay = delay
         self.armed_threshold = armed_threshold
+        self.input_impedance = input_impedance
 
     def apply(self, time_array: np.ndarray, open_circuit_voltage_array: np.ndarray, signal_baseline: float, polarity:float) -> tuple[np.ndarray, np.ndarray]:
 
@@ -44,7 +43,7 @@ class ConstantFractionDiscriminator:
                 continue
 
 
-            if (not armed) and (self.is_over_armed_threshold(polarity, self.armed_threshold, summed_array[i])):
+            if (not armed) and (self.is_over_armed_threshold(polarity, self.armed_threshold, removed_baseline_array[i])):
                 armed = True
 
 
@@ -57,13 +56,13 @@ class ConstantFractionDiscriminator:
                 crossing_time = time_array[i - 1] + crossing_fraction * (time_array[i] - time_array[i - 1]) 
 
                 crossing_times = np.append(crossing_times, crossing_time)
-                crossing_indexes = np.append(i)
+                crossing_indexes = np.append(crossing_indexes, i)
 
                 armed = False
-                waiting_for_reset = False
+                waiting_for_reset = True
 
 
-        return crossing_indexes, crossing_times
+        return crossing_indexes.astype(int), crossing_times
 
     
     def has_crossed(self, polarity, num1, num2):
