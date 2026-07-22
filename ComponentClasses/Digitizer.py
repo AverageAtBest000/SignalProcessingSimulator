@@ -8,11 +8,11 @@ class Digitizer:
         self.input_impedance = input_impedance
 
     @classmethod
-    def digitize(cls, time_array, voltage_array, 
-                 sampling_rate_Hz, num_bits, 
-                 min_volts, max_volts, event_threshold = None,
-                 polarity = None, pre_trigger_time = None,
-                 post_trigger_time = None, dc_offset = 0 ):
+    def digitize(cls, time_array: np.ndarray, voltage_array: np.ndarray, 
+                 sampling_rate_Hz: float, num_bits: float, 
+                 min_volts: float, max_volts: float, event_threshold: float = None,
+                 polarity: int = None, pre_trigger_time: float = None,
+                 post_trigger_time: float = None, dc_offset: float = 0 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, bool] :
 
 
         if len(time_array)!= len(voltage_array):

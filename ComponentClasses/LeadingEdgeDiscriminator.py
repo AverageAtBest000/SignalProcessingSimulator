@@ -2,12 +2,12 @@ import numpy as np
 
 class EdgeDiscriminator:
 
-    def __init__(self, threshold, polarity, input_impedance):
+    def __init__(self, threshold: float, polarity: int, input_impedance: float):
         self.threshold = threshold
         self.polarity = polarity
         self.input_impedance = input_impedance
 
-    def apply(self, time_array, signal_array):
+    def apply(self, time_array: np.ndarray, signal_array: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
         if self.polarity == -1 :
             threshhold_is_a = signal_array <= self.threshold

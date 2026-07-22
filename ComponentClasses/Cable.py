@@ -3,7 +3,7 @@ import scipy.constants as constants
 
 class Cable:
     
-    def __init__(self, length_m, velocity_factor, attenuation_db_per_m, characteristic_impedance = 50.0):
+    def __init__(self, length_m: float, velocity_factor: float, attenuation_db_per_m: float, characteristic_impedance: float = 50.0):
 
         self.validate_constructor_params(characteristic_impedance, length_m, velocity_factor, attenuation_db_per_m)
         self.characteristic_impedance = characteristic_impedance
@@ -22,7 +22,7 @@ class Cable:
             raise ValueError("attenuation_db_per_m must be finite and not negative")
 
 
-    def propagation(self, time_array, open_circuit_voltage_array, source_impedance, load_impedance, signal_baseline, max_round_trips):
+    def propagation(self, time_array: np.ndarray, open_circuit_voltage_array: np.ndarray, source_impedance: float, load_impedance: float, signal_baseline: float, max_round_trips: float) ->  tuple[np.ndarray, np.ndarray ] :
         
 
         self.validate_method_params(

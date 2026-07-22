@@ -10,6 +10,7 @@ class ConstantFractionDiscriminator:
         self.armed_threshold = armed_threshold
         self.input_impedance = input_impedance
 
+
     def apply(self, time_array: np.ndarray, open_circuit_voltage_array: np.ndarray, signal_baseline: float, polarity:float) -> tuple[np.ndarray, np.ndarray]:
 
         removed_baseline_array  = open_circuit_voltage_array - signal_baseline

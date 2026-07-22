@@ -1,3 +1,5 @@
+import string
+
 import numpy as np
 import scipy.constants as constants
 from typing_extensions import deprecated
@@ -46,23 +48,23 @@ class Generator:
 
     def get_PMT_signal( 
         self, 
-        expected_photoelectrons, 
-        time_array, 
-        t_0, 
-        Tao_fall, 
-        Tao_rise, 
-        Tao_fall_spe, 
-        Tao_rise_spe, 
-        polarity, 
-        SPE_pulse_area=8.0e-12, 
-        relative_gain_sigma=0.2,
-        random_seed=None,
-        pulse_area_method = "direct",
-        terminator_resistance = None,
-        PMT_gain = None,
-        SPE_pulse_area_is_open_circuit = False,
-        measurement_impedance = None
-    ):
+        expected_photoelectrons: int, 
+        time_array: np.ndarray, 
+        t_0: float, 
+        Tao_fall: float, 
+        Tao_rise: float, 
+        Tao_fall_spe: float, 
+        Tao_rise_spe: float, 
+        polarity: int, 
+        SPE_pulse_area: float = 8.0e-12, 
+        relative_gain_sigma: float = 0.2,
+        random_seed: int = None,
+        pulse_area_method: string = "direct",
+        terminator_resistance: float = None,
+        PMT_gain: float = None,
+        SPE_pulse_area_is_open_circuit: bool = False,
+        measurement_impedance: float = None
+    ) -> np.ndarray:
 
         num_samples = len(time_array)
         dt = time_array[1] - time_array[0]

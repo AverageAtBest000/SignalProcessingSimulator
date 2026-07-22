@@ -5,11 +5,11 @@ class Connector:
 
     @classmethod
     def connect(cls,
-                time_array,
-                open_circuit_voltage_array,
-                source_impedance,
-                load_impedance,
-                signal_baseline=0.0):
+                time_array: np.ndarray,
+                open_circuit_voltage_array: np.ndarray,
+                source_impedance: float,
+                load_impedance: float,
+                signal_baseline:float = 0.0) -> tuple[np.ndarray, np.ndarray]:
 
         pulse_voltage = open_circuit_voltage_array - signal_baseline
 
