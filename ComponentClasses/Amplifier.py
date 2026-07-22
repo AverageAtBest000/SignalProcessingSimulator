@@ -30,7 +30,7 @@ class Amplifier:
         self.min_voltage_out = min_voltage_out
 
 
-    def amplify(self, time_array, loaded_voltage_array, signal_baseline, output_baseline = 0.0):
+    def amplify(self, time_array: np.ndarray, loaded_voltage_array: np.ndarray, signal_baseline: float, output_baseline: float = 0.0) -> tuple[np.ndarray, np.ndarray]:
     # some of this only aplies to RF signal
         if len(time_array) != len(loaded_voltage_array) or len(time_array) < 2:
             raise ValueError("loaded_voltage_array and time_array must be of equal length and have at least two samples")
