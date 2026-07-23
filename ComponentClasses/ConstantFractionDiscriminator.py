@@ -11,9 +11,9 @@ class ConstantFractionDiscriminator:
         self.input_impedance = input_impedance
 
 
-    def apply(self, time_array: np.ndarray, open_circuit_voltage_array: np.ndarray, signal_baseline: float, polarity:float) -> tuple[np.ndarray, np.ndarray]:
+    def apply(self, time_array: np.ndarray, loaded_voltage_array: np.ndarray, signal_baseline: float, polarity:float) -> tuple[np.ndarray, np.ndarray]:
 
-        removed_baseline_array  = open_circuit_voltage_array - signal_baseline
+        removed_baseline_array  = loaded_voltage_array - signal_baseline
 
         attenuated_array = removed_baseline_array * self.attenuation
         attenuated_array = attenuated_array * -1

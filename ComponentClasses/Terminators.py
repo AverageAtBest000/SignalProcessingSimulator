@@ -22,7 +22,7 @@ class Terminator:
                         open_circuit_voltage_array: np.ndarray, 
                         source_impedance: float,
                         signal_baseline: float, 
-                        max_round_trips: float,
+                        max_round_trips: int,
                         ) ->  tuple[np.ndarray, np.ndarray ] :
 
         return cable.propagation(

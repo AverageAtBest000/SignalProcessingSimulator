@@ -22,7 +22,7 @@ class Cable:
             raise ValueError("attenuation_db_per_m must be finite and not negative")
 
 
-    def propagation(self, time_array: np.ndarray, open_circuit_voltage_array: np.ndarray, source_impedance: float, load_impedance: float, signal_baseline: float, max_round_trips: float) ->  tuple[np.ndarray, np.ndarray ] :
+    def propagation(self, time_array: np.ndarray, open_circuit_voltage_array: np.ndarray, source_impedance: float, load_impedance: float, signal_baseline: float, max_round_trips: int) ->  tuple[np.ndarray, np.ndarray ] :
         
 
         self.validate_method_params(
