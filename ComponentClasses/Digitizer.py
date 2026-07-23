@@ -15,7 +15,7 @@ class Digitizer:
                  post_trigger_time: float = None, dc_offset: float = 0 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray ] :
 
 
-        self.validate_params(time_array, 
+        cls.validate_params(time_array, 
                             voltage_array, 
                             sampling_rate_Hz, 
                             num_bits,
@@ -56,8 +56,8 @@ class Digitizer:
     
         return (discrete_times, Digitized_array, Reconstructed_array, was_clipped)
         
-    
-    def validate_params(self, time_array, voltage_array, sampling_rate_Hz, num_bits,event_threshold, polarity, pre_trigger_time, post_trigger_time, min_volts, max_volts):
+    @classmethod
+    def validate_params(cls, time_array, voltage_array, sampling_rate_Hz, num_bits,event_threshold, polarity, pre_trigger_time, post_trigger_time, min_volts, max_volts):
 
         if max_volts - min_volts <= 0:
             raise ValueError("max_volts must be greater than min_volts")
@@ -77,7 +77,7 @@ class Digitizer:
         if not np.all(np.isfinite(time_array)) or not np.all(np.isfinite(voltage_array)): 
             raise ValueError("time_array and voltage_array must contain only finite values")
         
-        if num_bits > 0 or type(num_bits) is not int:
+        if num_bits < 0 or type(num_bits) is not int:
             raise ValueError("num_bits must be a positive integer")
 
         unimplemented = (event_threshold, polarity, pre_trigger_time, post_trigger_time)

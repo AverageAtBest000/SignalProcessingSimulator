@@ -118,6 +118,4 @@ A for loop is then used to sum the signal produced by each photoelectron at each
 
 
 
-## Digitizer.py
-
-The ```SignalGenerator.py``` file contains the ```Generator``` class. The ```Generator``` class contains the class method ```get_PMT_signal()``` wich returns a synthetic signal that is modeled after a photomultiplier tube signal. To do this, we used a double exponential, initially represented as:
+## Splitter.py

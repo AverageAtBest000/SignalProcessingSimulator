@@ -33,7 +33,7 @@ class Amplifier:
     def amplify(self, time_array: np.ndarray, loaded_voltage_array: np.ndarray, signal_baseline: float, output_baseline: float = 0.0) -> tuple[np.ndarray, np.ndarray]:
     # some of this only aplies to RF signal
         
-
+        self.validate_params(time_array, loaded_voltage_array)
         time_delta = time_array[1] - time_array[0]
 
         sampling_frequency = 1 / time_delta
@@ -62,13 +62,18 @@ class Amplifier:
 
         return time_array, open_circuit_amplified_voltage
 
-    def validate_params(self, time_aray, voltage_array):
+    def validate_params(self, time_array, loaded_voltage_array):
         
         if len(time_array) != len(loaded_voltage_array) or len(time_array) < 2:
             raise ValueError("loaded_voltage_array and time_array must be of equal length and have at least two samples")
         
-        if self.high_cutoff_freq < 0 or self.low_cutoff_freq < 0:
-            raise ValueError("high_cutoff_freq and low_cutoff_freq must be greater than 0")
+        if self.high_cutoff_freq is not None:
+            if self.high_cutoff_freq < 0:
+                raise ValueError("high_cutoff_freq and low_cutoff_freq must be greater than 0")
+        
+        if self.low_cutoff_freq is not None:
+            if self.low_cutoff_freq < 0:
+                raise ValueError("high_cutoff_freq and low_cutoff_freq must be greater than 0")
 
     @classmethod
     def apply_high_freq_cutoff(cls, voltage_in, cutoff_frequency, time_delta):

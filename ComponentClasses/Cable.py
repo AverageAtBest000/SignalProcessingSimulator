@@ -90,7 +90,7 @@ class Cable:
             raise ValueError("time_array must be increasing")
         if not np.isfinite(signal_baseline):
             raise ValueError("signal_baseline must be finite")
-        if max_round_trips < 0 or type(max_round_trips) is not int:
+        if max_round_trips <= 0 or type(max_round_trips) is not int:
             raise ValueError("max_round_trips must be a positive integer")
 
     def calculate_delay(self):
