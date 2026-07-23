@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 class ConstantFractionDiscriminator:
     
-    def __init__(self, attenuation:float = None, delay:float = None, armed_threshold:float = None, input_impedance:float = None):
+    def __init__(self, attenuation:float, delay:float, armed_threshold:float, input_impedance:float):
         
         self.attenuation = attenuation
         self.delay = delay

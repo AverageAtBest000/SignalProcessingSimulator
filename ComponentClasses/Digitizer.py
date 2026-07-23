@@ -9,25 +9,23 @@ class Digitizer:
 
     @classmethod
     def digitize(cls, time_array: np.ndarray, voltage_array: np.ndarray, 
-                 sampling_rate_Hz: float, num_bits: float, 
+                 sampling_rate_Hz: float, num_bits: int, 
                  min_volts: float, max_volts: float, event_threshold: float = None,
                  polarity: int = None, pre_trigger_time: float = None,
-                 post_trigger_time: float = None, dc_offset: float = 0 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, bool] :
+                 post_trigger_time: float = None, dc_offset: float = 0 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray ] :
 
 
-        if len(time_array)!= len(voltage_array):
-            raise ValueError("time_array and voltage_array must be of equal length")
-        
-        if(len(time_array) < 2):
-            raise ValueError("time_array and voltage_array must contain at least 2 samples")
-        
-        if not np.all(np.isfinite(time_array)) or not np.all(np.isfinite(voltage_array)): 
-            raise ValueError("time_array and voltage_array must contain only finite values")
-
-        unimplemented = (event_threshold, polarity, pre_trigger_time, post_trigger_time)
-        for param in unimplemented:
-            if param is not None:  
-                raise ValueError("Triggering not yet implemented")
+        self.validate_params(time_array, 
+                            voltage_array, 
+                            sampling_rate_Hz, 
+                            num_bits,
+                            event_threshold, 
+                            polarity, 
+                            pre_trigger_time, 
+                            post_trigger_time,
+                            min_volts,
+                            max_volts
+                            )        
 
         sample_period = 1 / sampling_rate_Hz
         
@@ -58,7 +56,35 @@ class Digitizer:
     
         return (discrete_times, Digitized_array, Reconstructed_array, was_clipped)
         
+    
+    def validate_params(self, time_array, voltage_array, sampling_rate_Hz, num_bits,event_threshold, polarity, pre_trigger_time, post_trigger_time, min_volts, max_volts):
+
+        if max_volts - min_volts <= 0:
+            raise ValueError("max_volts must be greater than min_volts")
+
+        if len(time_array)!= len(voltage_array):
+            raise ValueError("time_array and voltage_array must be of equal length")
+
+        if len(time_array)!= len(voltage_array):
+           raise ValueError("time_array and voltage_array must be of equal length")
+
+        if sampling_rate_Hz <= 0 :
+            raise ValueError("sampling rate must be positive")
         
+        if(len(time_array) < 2):
+            raise ValueError("time_array and voltage_array must contain at least 2 samples")
+        
+        if not np.all(np.isfinite(time_array)) or not np.all(np.isfinite(voltage_array)): 
+            raise ValueError("time_array and voltage_array must contain only finite values")
+        
+        if num_bits > 0 or type(num_bits) is not int:
+            raise ValueError("num_bits must be a positive integer")
+
+        unimplemented = (event_threshold, polarity, pre_trigger_time, post_trigger_time)
+        for param in unimplemented:
+            if param is not None:  
+                raise ValueError("Triggering not yet implemented")
+
     @classmethod
-    def interpolate(cls, X, Y, val ) -> float :
+    def interpolate(cls, X, Y, val ):
         return np.interp(val, X, Y)

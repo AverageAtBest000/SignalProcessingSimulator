@@ -28,7 +28,7 @@ class Splitter:
         return open_circuit_voltage_array * ( load_impedance / (series_impedance + load_impedance) )
     
     
-    def split( self, time_array: np.ndarray, open_volts_array: np.ndarray, load_1_impedance: float, load_2_impedance: float, source_impedance: float, signal_baseline: float = 0.0 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    def split( self, time_array: np.ndarray, open_volts_array: np.ndarray, load_1_impedance: float, load_2_impedance: float, source_impedance: float, signal_baseline: float = 0.0 ) -> tuple[np.ndarray, np.ndarray, float, np.ndarray, float]:
         
         if len(time_array) != len(open_volts_array):
             raise ValueError("Time and Voltage array must be equal in length")

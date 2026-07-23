@@ -56,7 +56,7 @@ class Cable:
         
         for round_trip in range(max_round_trips):
             
-            if current_arrival_delay > time_array[-1]:
+            if current_arrival_delay > time_array[-1] - time_array[0]:
                 break
             
             delayed_incident_wave = self.delay_wave(
@@ -90,6 +90,8 @@ class Cable:
             raise ValueError("time_array must be increasing")
         if not np.isfinite(signal_baseline):
             raise ValueError("signal_baseline must be finite")
+        if max_round_trips < 0 or type(max_round_trips) is not int:
+            raise ValueError("max_round_trips must be a positive integer")
 
     def calculate_delay(self):
 

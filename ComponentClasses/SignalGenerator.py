@@ -59,7 +59,7 @@ class Generator:
         SPE_pulse_area: float = 8.0e-12, 
         relative_gain_sigma: float = 0.2,
         random_seed: int = None,
-        pulse_area_method: string = "direct",
+        pulse_area_method: str = "direct",
         terminator_resistance: float = None,
         PMT_gain: float = None,
         SPE_pulse_area_is_open_circuit: bool = False,
