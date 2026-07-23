@@ -1,22 +1,56 @@
+
+
 # Signal Processing Simulator
 
-This project is to let an experimenter design/pre-plan a simulated signal and run it through cables, splitters, or amplifiers and seeing how much the signal reflects, distorts, or messes up before reaching the digitizer.
-__________________________________________________________________________________________________________________________________________
-COMPUTER CLASSES
+This project allows an experimenter to design/pre-plan a simulated analog to digital path. Using the classes within this repo, one can generate a PMT signal, run it through cables, splitters, amplifiers, and other components. Code to gather and dysplay signal loss to the user is currently being implemented. 
 
-| files | our code (python) | how if affects signal |
+## Getting Started 
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/AverageAtBest000/SignalProcessingSimulator
+   cd SignalProcessingSimulator
+   ```
+
+2. **Set up a virtual environment (Recomended):**
+
+   If you do not have the venv package installed, run :
+   
+   ```bash
+   sudo apt update
+   sudo apt install python3-venv
+   ```
+   then, to create a virtual enviroment, run :
+   ```bash
+   python -m venv venv
+   source venv/bin/activate 
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. **To run the example circuit:**
+   ```bash
+   python3 main.py
+   ```
+   
+__________________________________________________________________________________________________________________________________________
+CLASS OVERVIEWS
+
+| File Name | our code (python) | effect on signals |
 |-------|-------------------|-----------------------|
-|Amplifier| This code is an amplifier class that'll amplify a simulated signal | Increases signal amplitude but can affect how fast the signal rises |
-|Cable| This code is a cable class that'll simulate a real cable for us to run our signal through | Delays signal times/reduces amplitude the longer the cable is |
-|Digitizer| This code is a digitizer class that'll turn a smooth signal into digital steps like a real analog digital converter | Electronic device that converts signals to digital data |
-|LeadingEdgeDiscriminator| This code is a LED class that'll find the moment that our signal will rise/fall on a certain level | Causes timing delays because it triggers at different moments (depending on signal size/noise level) |
-|SignalGenerator| This code is a signal generator class that'll create a realistic noisy PMT signal | This is the simulated signal
-|Splitter| This code is a splitter class that'll simulate a resistive splitter and divide one input signal into two or more output signals (what you choose) | Reduces a signals amplitude by half, but not changing the timing/shape
-|Terminators| This code is a terminator class that'll represent and control how much of a signal will bounce back | How much of the signal reflects back at the end |
-|Connectors| This code is a connector class that calculates how much voltage decreases from a signal when its plugged into a circuit | Messes up signals peak voltage and sometimes completely flatten/distorts the pule |
+|Amplifier| This file contains an amplifier class that increases the amplitude of a signal by a given gain | Increases signal amplitude and may affect how fast the signal rises |
+|Cable| This file contains the cable class that simulates a cable with customizable properties, such as length | Delays signal times/reduces amplitude relative to cable width and its characteristic impedance |
+|Digitizer| This file contains the digitizer class, wich takes in an analog signal and returns a digitized waveform| Discretizes the time, and voltage of a signal |
+|LeadingEdgeDiscriminator| This file contains the LED class, wich finds the moment that an input signal goes above a certain threshold | Causes timing delays because it triggers at differing moments (depending on signal size/noise level) and causes a loss in amplitude data |
+|SignalGenerator| This file contains the Signal generator class that creates a synthetic PMT signal | This is the simulated signal
+|Splitter| This file contains the splitter class, wich simulates a resistive splitter and divides one input signal into two  | Reduces a signal's amplitude depending on the provided resistor values. Does not change the timing/shape
+|Terminators| This file contains the terminator class that'll represent and control how much of a signal will bounce back | May add reflection to the waveform |
+|Connectors| This code is a connector class that calculates how much voltage decreases from a signal when its plugged into a circuit | May completely flatten or distort the pulse |
 |init| This code has all the classes we created in one place so we are able to import and use them for our signal |
 
-We put everything into classes to make our code more organized and neat rather than there being stacks on stacks of long code
+Classes were use in the development of the project in order to increase code maintainability/ 
 
 
 
@@ -79,6 +113,9 @@ A for loop is then used to sum the signal produced by each photoelectron at each
 * ```relative_gain``` is calculated using a normal distribution with a mean of one and a deviation of ```relative_mean_sigma```, passed in by the user. 
 
 * ```double_exponential_SPE``` is passed in using the ```normalized_double_exponential``` function with ```Tao_fall``` and ```Tao_rise``` set using their respective spe values and ```t_0``` set to the time when the photoelectron arrived. 
+
+### How to Use
+
 
 
 ## Digitizer.py
