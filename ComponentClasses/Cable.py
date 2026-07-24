@@ -23,8 +23,18 @@ class Cable:
 
 
     def propagation(self, time_array: np.ndarray, open_circuit_voltage_array: np.ndarray, source_impedance: float, load_impedance: float, signal_baseline: float, max_round_trips: int) ->  tuple[np.ndarray, np.ndarray ] :
-        
+            
+        """
+        Calculate the area of a rectangle.
 
+        Args:
+            width (float): The width of the rectangle.
+            height (float): The height of the rectangle.
+
+        Returns:
+            float: The calculated area of the rectangle.
+        """
+        
         self.validate_method_params(
             time_array,
             open_circuit_voltage_array,

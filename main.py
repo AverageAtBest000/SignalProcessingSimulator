@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from ComponentClasses import (  Amplifier, 
+from scipy.signal import spline_filter
+from ComponentClasses import (  Amplifier, Connector, 
                                 Digitizer, 
                                 Cable,
                                 Generator,
@@ -24,6 +25,7 @@ split_results = splitter.split(time_array, voltage_array, load_1_impedance = 50,
 signal_a = split_results[1]
 signal_b = split_results[3]
 
+_, loaded_voltage = Connector.connect(time_array, signal_b, split_results[4], digitizer.input_impedance,)
 
 (
     digitized_time,
@@ -32,7 +34,7 @@ signal_b = split_results[3]
     was_clipped
 ) = digitizer.digitize(
     time_array=time_array,
-    voltage_array=signal_b,
+    voltage_array=loaded_voltage,
     sampling_rate_Hz=2e9,
     num_bits=12,
     min_volts=-1.0,
@@ -42,7 +44,8 @@ signal_b = split_results[3]
 
 plt.plot(time_array, voltage_array, color="green", label="Original Signal")
 plt.plot(time_array, signal_a, color="red", label="Split Channel 1")
-plt.step(digitized_time, reconstructed_voltage, color="black", label="Split Channel 2")
+plt.plot(time_array, signal_b, color="blue", label="Split Channel 2")
+plt.step(digitized_time, reconstructed_voltage, color="black", label="Digitized Split Channel 2")
 
 plt.xlabel("Time (s)")
 plt.ylabel("Amplitude")

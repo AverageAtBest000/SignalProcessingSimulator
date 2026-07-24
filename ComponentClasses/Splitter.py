@@ -3,7 +3,16 @@
 import numpy as np
 
 class Splitter:
-    def __init__(self, R1, R2, R3):
+    def __init__(self, R1:float, R2:float, R3:float):
+        """
+        Stored the resistor values for the three resistor splitter
+
+        Args:
+            R1 (float): Resistance value in Ohms of the first resistor in the splitter.
+            R2 (float): Resistance value in Ohms of the first output resistor.
+            R3 (float): Resistance value in Ohms of the second output resistor.
+
+        """
         self.R1 = R1
         self.R2 = R2
         self.R3 = R3

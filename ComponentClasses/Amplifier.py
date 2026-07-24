@@ -68,11 +68,11 @@ class Amplifier:
             raise ValueError("loaded_voltage_array and time_array must be of equal length and have at least two samples")
         
         if self.high_cutoff_freq is not None:
-            if self.high_cutoff_freq < 0:
+            if self.high_cutoff_freq <= 0:
                 raise ValueError("high_cutoff_freq and low_cutoff_freq must be greater than 0")
         
         if self.low_cutoff_freq is not None:
-            if self.low_cutoff_freq < 0:
+            if self.low_cutoff_freq <= 0:
                 raise ValueError("high_cutoff_freq and low_cutoff_freq must be greater than 0")
 
     @classmethod

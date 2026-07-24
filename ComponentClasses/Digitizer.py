@@ -77,7 +77,7 @@ class Digitizer:
         if not np.all(np.isfinite(time_array)) or not np.all(np.isfinite(voltage_array)): 
             raise ValueError("time_array and voltage_array must contain only finite values")
         
-        if num_bits < 0 or type(num_bits) is not int:
+        if num_bits <= 0 or type(num_bits) is not int:
             raise ValueError("num_bits must be a positive integer")
 
         unimplemented = (event_threshold, polarity, pre_trigger_time, post_trigger_time)
