@@ -25,16 +25,20 @@ class Cable:
     def propagation(self, time_array: np.ndarray, open_circuit_voltage_array: np.ndarray, source_impedance: float, load_impedance: float, signal_baseline: float, max_round_trips: int) ->  tuple[np.ndarray, np.ndarray ] :
             
         """
-        Calculate the area of a rectangle.
+        Calculate and return the effect on a given signal after it has traveled through a cable.
 
         Args:
-            width (float): The width of the rectangle.
-            height (float): The height of the rectangle.
-
+            time_array (np.ndarray): Array of time values in seconds.
+            open_circuit_voltage_array (np.ndarray): Corresponding open circuit voltage values of the incoming signal at each time bin in time_array.
+            source_impedance (float): impedance of the component inputing the signal
+            load_impedance (float): impedance of the load component 
+            signal_baseline (float): Signal baseline. May be 0.0 or a DC offset 
+            max_round_trips (int): the maximum amount of times a signal can travel from it source, down the cable, and back.
         Returns:
-            float: The calculated area of the rectangle.
+            time_array (np.ndarray): Original time array.
+            loaded_output_voltage (np.ndarray): .
         """
-        
+
         self.validate_method_params(
             time_array,
             open_circuit_voltage_array,
@@ -86,7 +90,6 @@ class Cable:
         loaded_output_voltage = signal_baseline + output_voltage_change
 
         return time_array, loaded_output_voltage
-        pass
 
     def validate_method_params(self, time_array, voltage_array, source_impedance, load_impedance, signal_baseline, max_round_trips):
 
