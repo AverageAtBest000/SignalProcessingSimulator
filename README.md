@@ -118,4 +118,12 @@ A for loop is then used to sum the signal produced by each photoelectron at each
 
 
 
-## Splitter.py
+## Terminator.py
+The ```Terminator.py``` class represents a device connected to the end of a cable. It's job is to define the load impedance at the end of the cable and to determine whether part(s) of the signal is reflected back or absorbed. This class uses the ```Cable.py``` class to simulate how a signal behaves after reaching the end of the cable and calculates the reflection coefficent.
+
+REFLECTION COEFFICENT EQUATION:
+
+$\Gamma = \frac{Z_L - Z_0}{Z_L + Z_0}$
+* **$Z_L$** = Load impedance ($\Omega$)
+* **$Z_0$** = Cable impedance ($\Omega$)
+
