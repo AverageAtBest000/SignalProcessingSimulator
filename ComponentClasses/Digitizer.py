@@ -8,7 +8,7 @@ class Digitizer:
         self.input_impedance = input_impedance
 
     @classmethod
-    def digitize(cls, time_array: np.ndarray, voltage_array: np.ndarray, 
+    def digitize(cls, time_array: np.ndarray, loaded_voltage_array: np.ndarray, 
                  sampling_rate_Hz: float, num_bits: int, 
                  min_volts: float, max_volts: float, event_threshold: float = None,
                  polarity: int = None, pre_trigger_time: float = None,
@@ -16,7 +16,7 @@ class Digitizer:
 
 
         cls.validate_params(time_array, 
-                            voltage_array, 
+                            loaded_voltage_array, 
                             sampling_rate_Hz, 
                             num_bits,
                             event_threshold, 
@@ -37,7 +37,7 @@ class Digitizer:
 
         discrete_times = t_0 + np.arange(num_periods + 1 ) * sample_period 
         #interpolation may not be the way - document this
-        voltage_samples = cls.interpolate(time_array, voltage_array, discrete_times)
+        voltage_samples = cls.interpolate(time_array, loaded_voltage_array, discrete_times)
         
         voltage_samples = voltage_samples + dc_offset 
 
@@ -57,25 +57,25 @@ class Digitizer:
         return (discrete_times, Digitized_array, Reconstructed_array, was_clipped)
         
     @classmethod
-    def validate_params(cls, time_array, voltage_array, sampling_rate_Hz, num_bits,event_threshold, polarity, pre_trigger_time, post_trigger_time, min_volts, max_volts):
+    def validate_params(cls, time_array, loaded_voltage_array, sampling_rate_Hz, num_bits,event_threshold, polarity, pre_trigger_time, post_trigger_time, min_volts, max_volts):
 
         if max_volts - min_volts <= 0:
             raise ValueError("max_volts must be greater than min_volts")
 
-        if len(time_array)!= len(voltage_array):
-            raise ValueError("time_array and voltage_array must be of equal length")
+        if len(time_array)!= len(loaded_voltage_array):
+            raise ValueError("time_array and loaded_voltage_array must be of equal length")
 
-        if len(time_array)!= len(voltage_array):
-           raise ValueError("time_array and voltage_array must be of equal length")
+        if len(time_array)!= len(loaded_voltage_array):
+           raise ValueError("time_array and loaded_voltage_array must be of equal length")
 
         if sampling_rate_Hz <= 0 :
             raise ValueError("sampling rate must be positive")
         
         if(len(time_array) < 2):
-            raise ValueError("time_array and voltage_array must contain at least 2 samples")
+            raise ValueError("time_array and loaded_voltage_array must contain at least 2 samples")
         
-        if not np.all(np.isfinite(time_array)) or not np.all(np.isfinite(voltage_array)): 
-            raise ValueError("time_array and voltage_array must contain only finite values")
+        if not np.all(np.isfinite(time_array)) or not np.all(np.isfinite(loaded_voltage_array)): 
+            raise ValueError("time_array and loaded_voltage_array must contain only finite values")
         
         if num_bits <= 0 or type(num_bits) is not int:
             raise ValueError("num_bits must be a positive integer")
