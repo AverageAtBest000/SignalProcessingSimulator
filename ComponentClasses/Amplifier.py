@@ -61,11 +61,11 @@ class Amplifier:
             current_delta = open_circuit_amplified_voltage[i] - open_circuit_amplified_voltage[i-1]
 
             if current_delta > max_voltage_delta_up:
-                open_circuit_amplified_voltage[i] = open_circuit_amplified_voltage[i-1] + self.max_voltage_delta_up * time_delta
+                open_circuit_amplified_voltage[i] = open_circuit_amplified_voltage[i-1] + max_voltage_delta_up 
 
             elif current_delta < max_voltage_delta_down:
-                open_circuit_amplified_voltage[i] = open_circuit_amplified_voltage[i-1] + self.max_voltage_delta_down * time_delta
-
+                open_circuit_amplified_voltage[i] = open_circuit_amplified_voltage[i-1] + max_voltage_delta_down 
+                
         return open_circuit_amplified_voltage
 
     def validate_params(self, time_array, loaded_voltage_array):

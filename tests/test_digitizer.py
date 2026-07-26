@@ -7,7 +7,7 @@ def test_two_bit_digitization():
     time_array = np.array([0.0, 1.0, 2.0])
     voltage_array = np.array([-1.0, 0.0, 1.0])
 
-    times, codes, reconstructed, was_clipped = Digitizer.digitize( time_array=time_array, voltage_array=voltage_array, 
+    times, codes, reconstructed, was_clipped = Digitizer.digitize( time_array=time_array, loaded_voltage_array = voltage_array, 
                                                                    sampling_rate_Hz=1.0, num_bits=2, 
                                                                    min_volts=-1.0, max_volts=1.0,)
 
