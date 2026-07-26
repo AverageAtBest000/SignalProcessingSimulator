@@ -54,7 +54,7 @@ class Amplifier:
     @classmethod
     def apply_slew_rates(cls, open_circuit_amplified_voltage, slew_rate_up, slew_rate_down, time_delta):
         max_voltage_delta_up = slew_rate_up * time_delta
-        max_voltage_delta_up = slew_rate_down * time_delta
+        max_voltage_delta_down = slew_rate_down * time_delta
 
         for i in range(1, len(open_circuit_amplified_voltage)):
 

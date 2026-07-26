@@ -20,5 +20,6 @@ def test_filter_dc_response():
     np.testing.assert_allclose( Amplifier.apply_low_freq_cutoff(voltage, 1, 0.1), 0, atol=1e-15)
 
 def test_slew_rate():
-    voltage_array = [0.0, 1.0, 2.0, 10.0, 2.0, 1.0, 0.0]
-    
+    amplifier = Amplifier(2, "unitless", 50, 50, slew_rate_up=0.3, slew_rate_down=-0.3)
+    _, output = amplifier.amplify( np.arange(3.0), np.array([0.2, 0.7, -0.8]), 0.0, 0.0)
+    np.testing.assert_allclose(output, [0.2,0.5,0.2])
