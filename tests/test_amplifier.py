@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from ComponentClasses import Amplifier
+from main import voltage_array
 
 
 def test_gain_baselines_and_clipping():
@@ -17,3 +18,7 @@ def test_filter_dc_response():
     voltage = np.ones(5)
     np.testing.assert_allclose( Amplifier.apply_high_freq_cutoff(voltage, 1, 0.1), voltage)
     np.testing.assert_allclose( Amplifier.apply_low_freq_cutoff(voltage, 1, 0.1), 0, atol=1e-15)
+
+def test_slew_rate():
+    voltage_array = [0.0, 1.0, 2.0, 10.0, 2.0, 1.0, 0.0]
+    

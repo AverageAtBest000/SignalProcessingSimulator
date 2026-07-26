@@ -6,7 +6,7 @@ class Amplifier:
 
     def __init__(self, gain, gain_units, input_impedance, output_impedance, min_voltage_out, max_voltage_out, slew_rate_up = np.inf, slew_rate_down = -np.inf, low_cutoff_freq = None, high_cutoff_freq = None):
 
-        self.validate_constructor_params(gain_units, min_voltage_out, max_voltage_out, low_cutoff_freq, high_cutoff_freq, output_impedance, input_impedance, slew_rate_up, slew_rate_down)
+        self.validate_constructor_params(gain, gain_units, min_voltage_out, max_voltage_out, low_cutoff_freq, high_cutoff_freq, output_impedance, input_impedance, slew_rate_up, slew_rate_down)
 
         self.low_cutoff_freq = low_cutoff_freq
         self.high_cutoff_freq = high_cutoff_freq
@@ -14,7 +14,8 @@ class Amplifier:
         self.output_impedance = output_impedance
         self.max_voltage_out = max_voltage_out
         self.min_voltage_out = min_voltage_out
-        self.slew_rate = slew_rate
+        self.slew_rate_up = slew_rate_up
+        self.slew_rate_down = slew_rate_down
 
 
     def amplify(self, time_array: np.ndarray, loaded_voltage_array: np.ndarray, signal_baseline: float, output_baseline: float = 0.0) -> tuple[np.ndarray, np.ndarray]:
@@ -46,21 +47,27 @@ class Amplifier:
 
         open_circuit_amplified_voltage = np.clip(open_circuit_amplified_voltage, self.min_voltage_out, self.max_voltage_out)
 
-        max_voltage_delta_up = self.slew_rate * time_delta
-        max_voltage_delta_down = -max_voltage_delta_down
+        open_circuit_amplified_voltage = self.apply_slew_rates(open_circuit_amplified_voltage, self.slew_rate_up, self.slew_rate_down, time_delta)
+
+        return time_array, open_circuit_amplified_voltage
+
+    @classmethod
+    def apply_slew_rates(cls, open_circuit_amplified_voltage, slew_rate_up, slew_rate_down, time_delta):
+        max_voltage_delta_up = slew_rate_up * time_delta
+        max_voltage_delta_up = slew_rate_down * time_delta
 
         for i in range(1, len(open_circuit_amplified_voltage)):
 
             current_delta = open_circuit_amplified_voltage[i] - open_circuit_amplified_voltage[i-1]
-            
+
             if current_delta > max_voltage_delta_up:
-                open_circuit_amplified_voltage[i] = open_circuit_amplified_voltage[i-1] + max_voltage_delta_up * time_delta
+                open_circuit_amplified_voltage[i] = open_circuit_amplified_voltage[i-1] + self.max_voltage_delta_up * time_delta
+
             elif current_delta < max_voltage_delta_down:
-                open_circuit_amplified_voltage[i] = open_circuit_amplified_voltage[i-1] + max_voltage_delta_down * time_delta
+                open_circuit_amplified_voltage[i] = open_circuit_amplified_voltage[i-1] + self.max_voltage_delta_down * time_delta
 
-        return time_array, open_circuit_amplified_voltage
+        return open_circuit_amplified_voltage
 
-    
     def validate_params(self, time_array, loaded_voltage_array):
         
         if len(time_array) != len(loaded_voltage_array) or len(time_array) < 2:
@@ -75,7 +82,7 @@ class Amplifier:
                 raise ValueError("high_cutoff_freq and low_cutoff_freq must be greater than 0")
 
     
-    def validate_constructor_params(self, gain_units, min_voltage_out, max_voltage_out, low_cutoff_freq, high_cutoff_freq, output_impedance, input_impedance, slew_rate_up, slew_rate_down):
+    def validate_constructor_params(self, gain, gain_units, min_voltage_out, max_voltage_out, low_cutoff_freq, high_cutoff_freq, output_impedance, input_impedance, slew_rate_up, slew_rate_down):
 
         if gain_units.lower() == "db":
             self.gain = 10 ** (gain/20)
