@@ -47,7 +47,7 @@ plt.plot(time_array, signal_b, color="blue", label="Split Channel 2")
 plt.step(digitized_time, reconstructed_voltage, color="black", label="Digitized Split Channel 2")
 
 plt.xlabel("Time (s)")
-plt.ylabel("Amplitude")
+plt.ylabel("Amplitude of Photomultiplier tube Signal (V)")
 
 plt.legend()
 plt.grid(True)
