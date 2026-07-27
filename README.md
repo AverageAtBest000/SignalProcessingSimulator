@@ -6,7 +6,7 @@ This project allows an experimenter to design/pre-plan a simulated analog to dig
 
 ## Getting Started 
 
-1. **Clone the repository - last trusted commit:**
+1. **Clone the repository: **
    ```bash
    git clone https://github.com/AverageAtBest000/SignalProcessingSimulator
    cd SignalProcessingSimulator
@@ -14,13 +14,13 @@ This project allows an experimenter to design/pre-plan a simulated analog to dig
    
 2. **Set up a virtual environment (Recommended):**
 
-   If you do not have the venv package installed, run :
+   If you do not have the ```venv``` package installed, run :
    
    ```bash
    sudo apt update
    sudo apt install python3-venv
    ```
-   then, to create a virtual environment, run :
+   Then, to create a virtual environment, run :
    ```bash
    python -m venv venv
    source venv/bin/activate 
