@@ -43,7 +43,6 @@ _, loaded_voltage = Connector.connect(time_array, signal_b, split_results[4], di
 
 
 plt.plot(time_array, voltage_array, color="green", label="Original Signal")
-plt.plot(time_array, signal_a, color="red", label="Split Channel 1")
 plt.plot(time_array, signal_b, color="blue", label="Split Channel 2")
 plt.step(digitized_time, reconstructed_voltage, color="black", label="Digitized Split Channel 2")
 
