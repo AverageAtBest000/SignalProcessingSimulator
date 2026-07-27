@@ -6,12 +6,14 @@ from typing_extensions import deprecated
 
 class Generator: 
     
-    """============ Methods for simulation of PMT signal with scintillator=============="""
+    
 
 
     def __init__(self, output_impedance = 50.0):
         self.output_impedance = output_impedance
-
+    """============ Methods for simulation of PMT signal with scintillator=============="""
+    
+    
     @classmethod
     @deprecated("use normalized_double_exponential(), get_arival_rate() instead")
     def get_double_exponential(cls, num_photoelectrons, T, t_0, Tao_fall, Tao_rise):
@@ -118,3 +120,8 @@ class Generator:
         return signal            
 
         
+    """============ Methods for simulation of PMT signal with scintillator=============="""
+
+    def get_gaussian_signal(self, time_array, max_amplitude, standard_deviation):
+        
+        return max_amplitude * ( np.exp( -(time_array) / (2* standard_deviation **2) ) )
