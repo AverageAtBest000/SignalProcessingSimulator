@@ -33,12 +33,12 @@ _, loaded_voltage = Connector.connect(time_array, signal_b, split_results[4], di
     reconstructed_voltage,
     was_clipped
 ) = digitizer.digitize(
-    time_array=time_array,
-    voltage_array=loaded_voltage,
-    sampling_rate_Hz=2e9,
-    num_bits=12,
-    min_volts=-1.0,
-    max_volts=1.0
+    time_array = time_array,
+    loaded_voltage_array = loaded_voltage,
+    sampling_rate_Hz = 2e9,
+    num_bits = 12,
+    min_volts = -1.0,
+    max_volts = 1.0
 )
 
 

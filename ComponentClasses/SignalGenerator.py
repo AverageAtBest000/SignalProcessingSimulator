@@ -60,6 +60,7 @@ class Generator:
         polarity: int, 
         SPE_pulse_area: float = 8.0e-12, 
         relative_gain_sigma: float = 0.2,
+        transit_time_spread_fwhm = 0.0,
         random_seed: int = None,
         pulse_area_method: str = "direct",
         terminator_resistance: float = None,
@@ -74,6 +75,8 @@ class Generator:
         signal = np.zeros(num_samples)
 
         rng = np.random.default_rng(random_seed)
+
+        TTS_standard_dev = transit_time_spread_fwhm / 2.355
         
         expected = self.get_arrival_rate(expected_photoelectrons, self.normalized_double_exponential(time_array, t_0, 
                                                                                                    Tao_fall, Tao_rise))
@@ -102,7 +105,9 @@ class Generator:
             for photoelectron in range(photoelectron_arrivals[i]):
 
                 relative_gain = np.clip(rng.normal(1.0, relative_gain_sigma), 0, a_max=None)
-                photoelectron_time = time_array[i]
+                
+                gaussian_offset = 0 if transit_time_spread_fwhm < 0 else rng.normal(0, TTS_standard_dev) 
+                photoelectron_time = time_array[i] + gaussian_offset
 
                 signal += self.get_photoelectron_voltage(
                     polarity = polarity,
@@ -117,8 +122,16 @@ class Generator:
                     )
                 )
 
-        return signal            
+        return signal  
 
+
+    def get_PMT_event_train(self, time_array, event_times):
+        
+        waveform = np.zeros(len(time_array))
+
+        for event_time in event_times:
+            # current_wave = self.get_PMT_signal()
+            pass
         
     """============ Methods for simulation of PMT signal with scintillator=============="""
 
