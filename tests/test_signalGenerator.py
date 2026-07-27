@@ -17,10 +17,10 @@ def test_seed_and_polarity():
                                           expected_photoelectrons=100,
                                           time_array=time,
                                           t_0=10e-9,
-                                          Tao_fall=20e-9,
-                                          Tao_rise=5e-9,
-                                          Tao_fall_spe=6e-9,
-                                          Tao_rise_spe=2e-9,
+                                          Tau_fall=20e-9,
+                                          Tau_rise=5e-9,
+                                          Tau_fall_spe=6e-9,
+                                          Tau_rise_spe=2e-9,
                                           relative_gain_sigma=0,
                                           random_seed=7
                                           )
@@ -28,10 +28,10 @@ def test_seed_and_polarity():
                                           expected_photoelectrons=100,
                                           time_array=time,
                                           t_0=10e-9,
-                                          Tao_fall=20e-9,
-                                          Tao_rise=5e-9,
-                                          Tao_fall_spe=6e-9,
-                                          Tao_rise_spe=2e-9,
+                                          Tau_fall=20e-9,
+                                          Tau_rise=5e-9,
+                                          Tau_fall_spe=6e-9,
+                                          Tau_rise_spe=2e-9,
                                           relative_gain_sigma=0,
                                           random_seed=7
                                           )

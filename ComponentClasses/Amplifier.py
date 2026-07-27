@@ -4,7 +4,38 @@ import scipy.signal as signal
 class Amplifier:
     #saturating upper/lower can extend signals
 
-    def __init__(self, gain, gain_units, input_impedance, output_impedance, min_voltage_out, max_voltage_out, slew_rate_up = np.inf, slew_rate_down = -np.inf, low_cutoff_freq = None, high_cutoff_freq = None):
+    def __init__(self, 
+                 gain, 
+                 gain_units, 
+                 input_impedance, 
+                 output_impedance, 
+                 min_voltage_out, 
+                 max_voltage_out, 
+                 slew_rate_up = np.inf, 
+                 slew_rate_down = -np.inf, 
+                 low_cutoff_freq = None, 
+                 high_cutoff_freq = None
+                ):
+                
+
+        """
+        Store the amplifiers physical properties 
+
+        Args:
+            gain (float): value that scales the signal 
+            gain_units (str): Units of the previously provided gain. May be "unitless" or "dB".
+            input_impedance (float): impedance of the amplifier's input port. 
+            output_impedance (float): impedance of the amplifier's output port. 
+            min_voltage_out (float): minimum voltage outputed by the amplifier
+            max_voltage_out (float): maximum voltage outputed by the amplifier
+            slew_rate_up (float): slew rate when signal has a positive gradient
+            slew_rate_down (float): slew rate when signal has a negative gradient
+            low_cutoff_freq (float): cutoff for the high pass filter
+            high_cutoff_freq (floar): cutoff for the low pass filter
+        """
+
+
+
 
         self.validate_constructor_params(gain, gain_units, min_voltage_out, max_voltage_out, low_cutoff_freq, high_cutoff_freq, output_impedance, input_impedance, slew_rate_up, slew_rate_down)
 
@@ -20,6 +51,21 @@ class Amplifier:
 
     def amplify(self, time_array: np.ndarray, loaded_voltage_array: np.ndarray, signal_baseline: float, output_baseline: float = 0.0) -> tuple[np.ndarray, np.ndarray]:
         
+        """
+
+        Apply the load of a component the to the open circut voltage of the preceding component 
+
+        Args:
+            time_array (np.ndarray): Array of signal's time values in seconds.
+            loaded_voltage_array (np.ndarray): Corresponding loaded voltage values at each time bin in time_array. 
+            signal_baseline (float): Signal baseline. May be 0.0 or a DC offset
+            output_baseline (float): Signal baseline applied by the amplifier and not included in the original signal. 
+        Return:
+            time_array (np.ndarray): original time array.
+            open_circuit_aplified_voltage (np.ndarray): Array of voltage values after amplification without the load applied 
+        
+        """
+
         self.validate_params(time_array, loaded_voltage_array)
         time_delta = time_array[1] - time_array[0]
 

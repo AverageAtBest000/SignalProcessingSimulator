@@ -4,6 +4,15 @@ import scipy.constants as constants
 class Cable:
     
     def __init__(self, length_m: float, velocity_factor: float, attenuation_db_per_m: float, characteristic_impedance: float = 50.0):
+        
+        """
+        Store the Cable's physical characteristics 
+        Args:
+            length_m (float): The length of the cable in meters.
+            velocity_factor (float): The cable's velocity factor.
+            attenuation_db_per_m (float): Attenuation per meter of the cable in decibels. 
+            characteristic_impedance (float): 
+        """
 
         self.validate_constructor_params(characteristic_impedance, length_m, velocity_factor, attenuation_db_per_m)
         self.characteristic_impedance = characteristic_impedance
@@ -33,10 +42,10 @@ class Cable:
             source_impedance (float): impedance of the component inputing the signal
             load_impedance (float): impedance of the load component 
             signal_baseline (float): Signal baseline. May be 0.0 or a DC offset 
-            max_round_trips (int): the maximum amount of times a signal can travel from it source, down the cable, and back.
+            max_round_trips (int): the maximum amount of times a signal can travel from its source, down the cable, and back.
         Returns:
             time_array (np.ndarray): Original time array.
-            loaded_output_voltage (np.ndarray): .
+            loaded_output_voltage (np.ndarray): Voltage seen at the far end of the cable with the load applied
         """
 
         self.validate_method_params(

@@ -21,25 +21,25 @@ num_seconds = 100e-9
 num_samples = 5000
 
 time_array = np.linspace(0,num_seconds, num_samples)
-# voltage_array = generator.get_PMT_signal(expected_photoelectrons = 40, time_array = time_array, t_0 = 10e-9, Tao_fall=2.1e-9, Tao_rise=0.9e-9, Tao_fall_spe = 6e-9 , Tao_rise_spe = 2e-9, polarity=1)
+# voltage_array = generator.get_PMT_signal(expected_photoelectrons = 40, time_array = time_array, t_0 = 10e-9, Tau_fall=2.1e-9, Tau_rise=0.9e-9, Tau_fall_spe = 6e-9 , Tau_rise_spe = 2e-9, polarity=1)
 
 
 # event_times = np.array([np.random.uniform(0, time_array[-1]),np.random.uniform(0, time_array[-1]), np.random.uniform(0, time_array[-1]) ])
 event_times = np.array([np.random.uniform(0, time_array[-1000]),np.random.uniform(0, time_array[-1000]), np.random.uniform(0, time_array[-1000]) ])
 
-Tao_fall = np.array([2.1e-9, 2.1e-9, 2.1e-9])
-Tao_rise = np.array([0.9e-9, 0.9e-9, 0.9e-9])
-Tao_fall_spe  = np.array([6e-9, 6e-9, 6e-9])
-Tao_rise_spe  = np.array([2e-9, 2e-9, 2e-9])
+Tau_fall = np.array([2.1e-9, 2.1e-9, 2.1e-9])
+Tau_rise = np.array([0.9e-9, 0.9e-9, 0.9e-9])
+Tau_fall_spe  = np.array([6e-9, 6e-9, 6e-9])
+Tau_rise_spe  = np.array([2e-9, 2e-9, 2e-9])
 
 voltage_array = generator.get_PMT_event_train(  time_array = time_array,
                                                 event_times = event_times,
                                                 expected_photoelectrons = 40,
                                                 polarity = 1,
-                                                Tao_fall = Tao_fall,
-                                                Tao_rise = Tao_rise,
-                                                Tao_fall_spe = Tao_fall_spe,  
-                                                Tao_rise_spe = Tao_rise_spe,
+                                                Tau_fall = Tau_fall,
+                                                Tau_rise = Tau_rise,
+                                                Tau_fall_spe = Tau_fall_spe,  
+                                                Tau_rise_spe = Tau_rise_spe,
                                                 )
                                                 
 

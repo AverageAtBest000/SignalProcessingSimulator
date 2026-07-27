@@ -17,19 +17,27 @@ class Generator:
     
     @classmethod
     @deprecated("use normalized_double_exponential(), get_arival_rate() instead")
-    def get_double_exponential(cls, num_photoelectrons, T, t_0, Tao_fall, Tao_rise):
-        raw_wave =  num_photoelectrons / (Tao_fall - Tao_rise) * ( np.exp(-(T-t_0)/Tao_fall) - np.exp( -(T-t_0)/Tao_rise )  )
+    def get_double_exponential(cls, num_photoelectrons, T, t_0, Tau_fall, Tau_rise):
+        raw_wave =  num_photoelectrons / (Tau_fall - Tau_rise) * ( np.exp(-(T-t_0)/Tau_fall) - np.exp( -(T-t_0)/Tau_rise )  )
         return np.where(T >= t_0, raw_wave, 0)
     
     @classmethod
-    def normalized_double_exponential(cls, time_array, t_0, Tao_fall, Tao_rise): 
-        raw_wave =  ( np.exp( -(time_array-t_0) / Tao_fall) - np.exp( -(time_array - t_0) / Tao_rise )  ) / (Tao_fall - Tao_rise)
+    def normalized_double_exponential(cls, time_array, t_0, Tau_fall, Tau_rise): 
+        raw_wave =  ( np.exp( -(time_array-t_0) / Tau_fall) - np.exp( -(time_array - t_0) / Tau_rise )  ) / (Tau_fall - Tau_rise)
         return np.where(time_array >= t_0, raw_wave, 0)
 
     @classmethod
     def get_arrival_rate(cls, mean_number_photoelectrons, scintillator_double_exponential ):
         return mean_number_photoelectrons * scintillator_double_exponential
                 
+    @classmethod
+    def get_arrival_rate_peak(cls, peak_voltage, scintillator_double_exponential):
+        
+        max = np.max(scintillator_double_exponential)
+        max_normalized_exponential = scintillator_double_exponential / max
+
+        return peak_voltage * max_normalized_exponential
+
     @classmethod
     def get_photoelectron_voltage(cls, polarity, SPE_pulse_area, relative_gain, double_exponential_SPE):
         return polarity * SPE_pulse_area * relative_gain * double_exponential_SPE 
@@ -54,10 +62,10 @@ class Generator:
         expected_photoelectrons: int, 
         time_array: np.ndarray, 
         t_0: float, 
-        Tao_fall: float, 
-        Tao_rise: float, 
-        Tao_fall_spe: float, 
-        Tao_rise_spe: float, 
+        Tau_fall: float, 
+        Tau_rise: float, 
+        Tau_fall_spe: float, 
+        Tau_rise_spe: float, 
         polarity: int, 
         SPE_pulse_area: float = 8.0e-12, 
         relative_gain_sigma: float = 0.2,
@@ -70,6 +78,37 @@ class Generator:
         measurement_impedance: float = None
     ) -> np.ndarray:
 
+
+     
+        """
+        Apply the load of a component the to the open circut voltage of the preceding component 
+        
+        Args:
+            expected_photoelectrons (int): mean number of photoelectrons expected to reach the photocathode 
+            time_array (np.ndarray): Array of signal's time values in seconds.
+            t_0 (float): Time at which the pulse begins 
+            Tau_fall (float): Constant that controls the  
+            Tau_rise (float): Constant that controls th 
+            Tau_fall_spe (float):
+            Tau_rise_spe (float):
+            polarity (int): Polarity of the signal (1 or -1)
+            SPE_pulse_area (float): The area under the curve of a single photo-electron pulse 
+            relative_gain_sigma (float): Standard deviation of photoelctron signal intensity
+            transit_time_spread_fwhm (float): 
+            random_seed (int): Seed used to generate samples from probability spreads (posson and uniform)
+            pulse_area_method (str) : Method for calculating pulse area under a photo-electron signal. May be "direct" or "estimate_from_g_r, which estimates using the PMT's gain and termination resistance"
+            terminator_resistance ()
+            PMT_gain (float): Optional parameter used if pulse area is estimated instead of passe in directly 
+            SPE_pulse_area_is_open_circuit (bool): Optional parameter  
+            measurement_impedance
+
+        Return:
+            time_array (np.ndarray): original time array.
+            loaded_voltage_array (np.ndarray): Array of voltage values after the load has been applied
+
+        """
+    
+
         num_samples = len(time_array)
         dt = time_array[1] - time_array[0]
         
@@ -80,7 +119,7 @@ class Generator:
         TTS_standard_dev = transit_time_spread_fwhm / 2.355
         
         expected = self.get_arrival_rate(expected_photoelectrons, self.normalized_double_exponential(time_array, t_0, 
-                                                                                                   Tao_fall, Tao_rise))
+                                                                                                   Tau_fall, Tau_rise))
         expected = np.clip(expected, 0, None) * dt
         photoelectron_arrivals = rng.poisson(lam=expected, size=len(expected))
         
@@ -117,8 +156,8 @@ class Generator:
                     double_exponential_SPE = ( self.normalized_double_exponential(
                                                     time_array=time_array,
                                                     t_0=photoelectron_time,
-                                                    Tao_fall=Tao_fall_spe,
-                                                    Tao_rise=Tao_rise_spe
+                                                    Tau_fall=Tau_fall_spe,
+                                                    Tau_rise=Tau_rise_spe
                                                     )
                     )
                 )
@@ -130,10 +169,10 @@ class Generator:
                              event_times: np.ndarray , 
                              expected_photoelectrons: int, 
                              polarity: int,
-                             Tao_fall: np.ndarray,
-                             Tao_rise: np.ndarray,
-                             Tao_fall_spe: np.ndarray,
-                             Tao_rise_spe: np.ndarray,
+                             Tau_fall: np.ndarray,
+                             Tau_rise: np.ndarray,
+                             Tau_fall_spe: np.ndarray,
+                             Tau_rise_spe: np.ndarray,
                              random_seeds: np.ndarray = np.array([None, None, None ]),
                              pulse_area_method : str = "direct",
                              terminator_resistance: float = None,
@@ -152,10 +191,10 @@ class Generator:
                                                 time_array = time_array, 
                                                 t_0 = event_time,
                                                 polarity = polarity,
-                                                Tao_fall = Tao_fall[count],
-                                                Tao_rise = Tao_rise[count],
-                                                Tao_fall_spe = Tao_fall_spe[count] ,
-                                                Tao_rise_spe = Tao_rise_spe[count],
+                                                Tau_fall = Tau_fall[count],
+                                                Tau_rise = Tau_rise[count],
+                                                Tau_fall_spe = Tau_fall_spe[count] ,
+                                                Tau_rise_spe = Tau_rise_spe[count],
                                                 random_seed = random_seeds[count],
                                                 pulse_area_method = pulse_area_method,
                                                 terminator_resistance = terminator_resistance,
