@@ -2,7 +2,7 @@
 
 # Signal Processing Simulator
 
-This project allows an experimenter to design/pre-plan a simulated analog to digital path. Using the classes within this repo, one can generate a PMT signal, run it through cables, splitters, amplifiers, and other components. Code to gather and dysplay signal loss to the user is currently being implemented. 
+This project allows an experimenter to design/pre-plan a simulated analog to digital path. Using the classes within this repo, one can generate a PMT signal, run it through cables, splitters, amplifiers, and other components. Code to gather and display signal loss to the user is currently being implemented. 
 
 ## Getting Started 
 
@@ -12,7 +12,7 @@ This project allows an experimenter to design/pre-plan a simulated analog to dig
    cd SignalProcessingSimulator
    ```
    
-2. **Set up a virtual environment (Recomended):**
+2. **Set up a virtual environment (Recommended):**
 
    If you do not have the venv package installed, run :
    
@@ -20,7 +20,7 @@ This project allows an experimenter to design/pre-plan a simulated analog to dig
    sudo apt update
    sudo apt install python3-venv
    ```
-   then, to create a virtual enviroment, run :
+   then, to create a virtual environment, run :
    ```bash
    python -m venv venv
    source venv/bin/activate 
@@ -42,10 +42,10 @@ CLASS OVERVIEWS
 |-------|-------------------|-----------------------|
 |Amplifier| This file contains an amplifier class that increases the amplitude of a signal by a given gain | Increases signal amplitude and may affect how fast the signal rises |
 |Cable| This file contains the cable class that simulates a cable with customizable properties, such as length | Delays signal times/reduces amplitude relative to cable width and its characteristic impedance |
-|Digitizer| This file contains the digitizer class, wich takes in an analog signal and returns a digitized waveform| Discretizes the time, and voltage of a signal |
-|LeadingEdgeDiscriminator| This file contains the LED class, wich finds the moment that an input signal goes above a certain threshold | Causes timing delays because it triggers at differing moments (depending on signal size/noise level) and causes a loss in amplitude data |
+|Digitizer| This file contains the digitizer class, which takes in an analog signal and returns a digitized waveform| Discretizes the time, and voltage of a signal |
+|LeadingEdgeDiscriminator| This file contains the LED class, which finds the moment that an input signal goes above a certain threshold | Causes timing delays because it triggers at differing moments (depending on signal size/noise level) and causes a loss in amplitude data |
 |SignalGenerator| This file contains the Signal generator class that creates a synthetic PMT signal | This is the simulated signal
-|Splitter| This file contains the splitter class, wich simulates a resistive splitter and divides one input signal into two  | Reduces a signal's amplitude depending on the provided resistor values. Does not change the timing/shape
+|Splitter| This file contains the splitter class, which simulates a resistive splitter and divides one input signal into two  | Reduces a signal's amplitude depending on the provided resistor values. Does not change the timing/shape
 |Terminators| This file contains the terminator class that'll represent and control how much of a signal will bounce back | May add reflection to the waveform |
 |Connectors| This code is a connector class that calculates how much voltage decreases from a signal when its plugged into a circuit | May completely flatten or distort the pulse |
 |init| This code has all the classes we created in one place so we are able to import and use them for our signal |
@@ -56,16 +56,16 @@ Classes were use in the development of the project in order to increase code mai
 
 ## SignalGenerator.py
 
-The ```SignalGenerator.py``` file contains the ```Generator``` class. The ```Generator``` class contains the class method ```get_PMT_signal()``` wich returns a synthetic signal that is modeled after a photomultiplier tube signal. To do this, we used a double exponential, initially represented as:
+The ```SignalGenerator.py``` file contains the ```Generator``` class. The ```Generator``` class contains the class method ```get_PMT_signal()``` which returns a synthetic signal that is modeled after a photo-multiplier tube signal. To do this, we used a double exponential, initially represented as:
 
 $$
-    f(t) = e^{ \frac{-(t - t_0)}{ tau_f} } - e^{ \frac{-(t - t_0)}{ tau_r} } 
+    f(t) = e^{ \frac{-(t - t_0)}{ \tau_f} } - e^{ \frac{-(t - t_0)}{ \tau_r} } 
 $$
 
 The generator was later modified to use the normalized function :
 
 $$
-    f(t) =  \frac {e^{ \frac{-(t - t_0)}{ tau_f} } - e^{ \frac{-(t - t_0)}{ tau_r} }} { tau_f - tau_r} 
+    f(t) =  \frac {e^{ \frac{-(t - t_0)}{ \tau_f} } - e^{ \frac{-(t - t_0)}{ \tau_r} }} { \tau_f - \tau_r} 
 $$
 
 Implemented in code as: 
@@ -87,7 +87,7 @@ $$
 This equation yields units of $\frac{PE}{s}$. Because $f(t)$ integrates to one :
 
 $$
-    \int  \lambda(t) \,dt = N_{expected}
+    \int  \lambda(t) \ dt = N_{expected}
 $$
 
 *Function for arrival rate calculation*
@@ -96,23 +96,23 @@ def get_arrival_rate(cls, mean_number_photoelectrons, scintillator_double_expone
         return mean_number_photoelectrons * scintillator_double_exponential
 ```
 
-In ```get_PMT_singal()```, we then calculate the time delta between each time step, ```dt```. Multiplying the result of ```get_arrival_rate()``` by ```dt``` yields an array ```expected```, where ```expected[i]``` gives you the number of photoelectrons that are expected to arrive during time bin ```i```.
+In ```get_PMT_singal()```, we then calculate the time delta between each time step, ```dt```. Multiplying the result of ```get_arrival_rate()``` by ```dt``` yields an array ```expected```, where ```expected[i]``` gives you the number of photo-electrons that are expected to arrive during time bin ```i```.
 
 
-The ```expected``` array is then used to draw from a poisson distribution in order to calculate the actual number of photoelectron arrivals at each time bin. 
+The ```expected``` array is then used to draw from a Poisson distribution in order to calculate the actual number of photo-electron arrivals at each time bin. 
 
 ```Python
         photoelectron_arrivals = rng.poisson(lam=expected, size=len(expected))
 ```
 
 
-A for loop is then used to sum the signal produced by each photoelectron at each time bin using ```get_photoelecton_voltage```. The parameters used are : ```polarity```, ```SPE_pulse_area```, ```relative_gain```, and  ```double_exponential_SPE```. Where : 
+A for loop is then used to sum the signal produced by each photo-electron at each time bin using ```get_photoelecton_voltage```. The parameters used are : ```polarity```, ```SPE_pulse_area```, ```relative_gain```, and  ```double_exponential_SPE```. Where : 
 
-* ```SPE_pulse_area``` represents the area under the pulse generated by a photoelectron. This can either be passed in directly using ```pulse_area_method = "direct"``` and pasing in the desired ```SPE_pulse_area``` or estimated using  ```pulse_area_method = "estimate_from_g_r"```  and passing in ```terminator_resistance``` and ```PMT_gain```.
+* ```SPE_pulse_area``` represents the area under the pulse generated by a photo-electron. This can either be passed in directly using ```pulse_area_method = "direct"``` and passing in the desired ```SPE_pulse_area``` or estimated using  ```pulse_area_method = "estimate_from_g_r"```  and passing in ```terminator_resistance``` and ```PMT_gain```.
 
 * ```relative_gain``` is calculated using a normal distribution with a mean of one and a deviation of ```relative_gain_sigma```, passed in by the user. 
 
-* ```double_exponential_SPE``` is passed in using the ```normalized_double_exponential``` function with ```Tao_fall``` and ```Tao_rise``` set using their respective spe values and ```t_0``` set to the time when the photoelectron arrived. 
+* ```double_exponential_SPE``` is passed in using the ```normalized_double_exponential``` function with ```Tao_fall``` and ```Tao_rise``` set using their respective spe values and ```t_0``` set to the time when the photo-electron arrived. 
 
 ### How to Use
 
