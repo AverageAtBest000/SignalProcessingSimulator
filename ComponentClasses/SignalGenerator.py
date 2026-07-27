@@ -11,6 +11,7 @@ class Generator:
 
     def __init__(self, output_impedance = 50.0):
         self.output_impedance = output_impedance
+
     """============ Methods for simulation of PMT signal with scintillator=============="""
     
     
@@ -125,13 +126,47 @@ class Generator:
         return signal  
 
 
-    def get_PMT_event_train(self, time_array, event_times):
+    def get_PMT_event_train( self, time_array : np.ndarray, 
+                             event_times: np.ndarray , 
+                             expected_photoelectrons: int, 
+                             polarity: int,
+                             Tao_fall: np.ndarray,
+                             Tao_rise: np.ndarray,
+                             Tao_fall_spe: np.ndarray,
+                             Tao_rise_spe: np.ndarray,
+                             random_seeds: np.ndarray = np.array([None, None, None ]),
+                             pulse_area_method : str = "direct",
+                             terminator_resistance: float = None,
+                             PMT_gain: float = None,
+                             SPE_pulse_area_is_open_circuit: bool = False,
+                             measurement_impedance: float = None
+                            ) -> np.ndarray:
         
         waveform = np.zeros(len(time_array))
 
+        count = 0
+
         for event_time in event_times:
-            # current_wave = self.get_PMT_signal()
-            pass
+
+            current_wave = self.get_PMT_signal( expected_photoelectrons = expected_photoelectrons,
+                                                time_array = time_array, 
+                                                t_0 = event_time,
+                                                polarity = polarity,
+                                                Tao_fall = Tao_fall[count],
+                                                Tao_rise = Tao_rise[count],
+                                                Tao_fall_spe = Tao_fall_spe[count] ,
+                                                Tao_rise_spe = Tao_rise_spe[count],
+                                                random_seed = random_seeds[count],
+                                                pulse_area_method = pulse_area_method,
+                                                terminator_resistance = terminator_resistance,
+                                                PMT_gain = PMT_gain,
+                                                SPE_pulse_area_is_open_circuit = SPE_pulse_area_is_open_circuit,
+                                                measurement_impedance = measurement_impedance
+                                                 )
+            count += 1 
+            waveform += current_wave
+    
+        return waveform
         
     """============ Methods for simulation of PMT signal with scintillator=============="""
 

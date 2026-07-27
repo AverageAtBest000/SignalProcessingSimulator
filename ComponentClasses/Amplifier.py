@@ -51,6 +51,7 @@ class Amplifier:
 
         return time_array, open_circuit_amplified_voltage
 
+
     @classmethod
     def apply_slew_rates(cls, open_circuit_amplified_voltage, slew_rate_up, slew_rate_down, time_delta):
         max_voltage_delta_up = slew_rate_up * time_delta
@@ -67,6 +68,7 @@ class Amplifier:
                 open_circuit_amplified_voltage[i] = open_circuit_amplified_voltage[i-1] + max_voltage_delta_down 
                 
         return open_circuit_amplified_voltage
+
 
     def validate_params(self, time_array, loaded_voltage_array):
         
