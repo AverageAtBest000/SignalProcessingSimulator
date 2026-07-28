@@ -118,12 +118,68 @@ A for loop is then used to sum the signal produced by each photo-electron at eac
 
 
 
-## Terminator.py
-The ```Terminator.py``` class represents a device connected to the end of a cable. It's job is to define the load impedance at the end of the cable and to determine whether part(s) of the signal is reflected back or absorbed. This class uses the ```Cable.py``` class to simulate how a signal behaves after reaching the end of the cable and calculates the reflection coefficent.
+## Splitter.py
+The ```Splitter.py``` file contains the ```Slpitter``` class. The ```Slpitter``` class contains method ```split()```, which returns two open circuit voltage arrays (one for each branch), as well as their corresponding impedance values in order to apply load to the open circuit later. To do this, we first calculate the impedance of the source branch : 
 
-REFLECTION COEFFICENT EQUATION:
+$$
+    Z_{SourceBranch} = Z_{SourceImpedance} + R_1 
+$$
 
-$\Gamma = \frac{Z_L - Z_0}{Z_L + Z_0}$
-* **$Z_L$** = Load impedance ($\Omega$)
-* **$Z_0$** = Cable impedance ($\Omega$)
+We can do the same for the remaining branches:
+
+$$
+    Z_{Branch1} = Z_{Load1} + R_2 
+$$
+
+$$
+    Z_{Branch2} = Z_{Load2} + R_1 
+$$
+
+This allows us to calculate the impedance experienced by the two loads. We do this by removing the load of whatever branch we are calculating the equivalent impedance from in order to continue our convention of return open circuit thevenin signals: 
+
+$$
+    Z_{out1} = R_2 + Z_{SourceBranch}||Z_{Branch2}
+$$
+
+$$
+    Z_{out2} = R_3 + Z_{SourceBranch}||Z_{Branch1}
+$$
+
+
+
+## Cable.py
+The ```Cable.py``` file contains the ```Cable``` class. The ```Cable``` class contains method ```propagation()```, which takes in a unloaded, open circuit voltage array and returns a signal loaded with the both the source impedance and the load impedance. To do this, we first calculate delay:
+
+$$
+    delay = \frac{L_m}{(V_f)(c)}
+$$
+
+where $L_m$ is cable length in meters, $V_f$ is the cable's velocity factor, and $c$ is the speed of light. Next the attenuation factor is calculated: 
+
+$$
+    A = 10^{-(\alpha L_m) / 20}
+$$
+
+where $\alpha$ is the attenuation per meter in dB. Next we calculate the reflection coefficient at both the load and the source: 
+
+$$
+    \Gamma_L = \frac{Z_L - Z_0}{Z_L + Z_0}
+$$
+
+$$
+    \Gamma_S = \frac{Z_S - Z_0}{Z_S + Z_0}
+$$
+
+Next we can calculate the wave launches into the cable, taking into account that the a voltage divider is formed between the cable and the signal source. 
+
+
+$$
+    V_L(t) = V_{in}(t)\frac{Z_0}{Z_S + Z_0}
+$$
+
+
+
+
+
+
 
