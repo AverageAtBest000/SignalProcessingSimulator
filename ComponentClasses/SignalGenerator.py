@@ -87,8 +87,8 @@ class Generator:
             expected_photoelectrons (int): mean number of photoelectrons expected to reach the photocathode 
             time_array (np.ndarray): Array of signal's time values in seconds.
             t_0 (float): Time at which the pulse begins 
-            Tau_fall (float): Constant that controls the  
-            Tau_rise (float): Constant that controls th 
+            Tau_fall (float): Constant that controls the decay time of the scintillator double exponential. A larger value will make the signal take longer to decay.
+            Tau_rise (float): Constant that controls the rise time of the scintillator double exponential. A larger value will make the signal take longer to reach its peak. 
             Tau_fall_spe (float):
             Tau_rise_spe (float):
             polarity (int): Polarity of the signal (1 or -1)
@@ -101,7 +101,6 @@ class Generator:
             PMT_gain (float): Optional parameter used if pulse area is estimated instead of passe in directly 
             SPE_pulse_area_is_open_circuit (bool): Optional parameter  
             measurement_impedance
-
         Return:
             time_array (np.ndarray): original time array.
             loaded_voltage_array (np.ndarray): Array of voltage values after the load has been applied

@@ -8,3 +8,4 @@ from .Splitter import Splitter
 from .Terminators import Terminator
 from .SignalGenerator import Generator
 from .Connector import Connector
+from .CircuitAnalyzer import CircuitAnalyzer

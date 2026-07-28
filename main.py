@@ -9,13 +9,14 @@ from ComponentClasses import (  Amplifier, Connector,
                                 Generator,
                                 Terminator, 
                                 Splitter, 
-                                EdgeDiscriminator)
-
+                                EdgeDiscriminator,
+                                CircuitAnalyzer)
 
 
 generator = Generator()
 splitter = Splitter(16.5, 16.5, 16.5)
 digitizer = Digitizer()
+analyzer = CircuitAnalyzer()
 
 num_seconds = 100e-9
 num_samples = 5000
@@ -43,7 +44,7 @@ voltage_array = generator.get_PMT_event_train(  time_array = time_array,
                                                 )
                                                 
 
-split_results = splitter.split(time_array, voltage_array, load_1_impedance = 50,load_2_impedance = 50, source_impedance = 50)
+split_results = splitter.split(time_array, voltage_array, load_1_impedance = 50,load_2_impedance = 50, source_impedance = generator.output_impedance)
 signal_a = split_results[1]
 signal_b = split_results[3]
 
@@ -63,7 +64,45 @@ _, loaded_voltage = Connector.connect(time_array, signal_b, split_results[4], di
     max_volts = 1.0
 )
 
+analyzer.record_stage(
+    name="PMT output",
+    time_array=time_array,
+    voltage_array=voltage_array,
+    polarity=1,
+    component_name="Generator",
+    voltage_type="open_circuit",
+    baseline=0.0,
+    source_impedance=generator.output_impedance,
+)
 
+analyzer.record_stage(
+    name="Splitter channel 2",
+    time_array=time_array,
+    voltage_array=signal_b,
+    polarity=1,
+    component_name="Splitter",
+    voltage_type="open_circuit",
+    baseline=0.0,
+    source_impedance=split_results[4],
+    load_impedance=digitizer.input_impedance,
+)
+
+analyzer.record_stage(
+    name="Digitizer input",
+    time_array=time_array,
+    voltage_array=loaded_voltage,
+    polarity=1,
+    component_name="Digitizer",
+    voltage_type="loaded",
+    baseline=0.0,
+    source_impedance=split_results[4],
+    load_impedance=digitizer.input_impedance,
+    adc_codes=ADC_codes,
+    was_clipped=was_clipped,
+)
+
+for stage_name in analyzer.stages:
+    analyzer.display_diagnostics(stage_name)
 
 
 plt.plot(time_array, voltage_array, color="green", label="Original Signal")
