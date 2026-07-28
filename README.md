@@ -84,7 +84,7 @@ $$
     \lambda(t) = N_{expected}f(t)
 $$ 
 
-This equation yields units of $\frac{PE}{s}$. Because $f(t)$ integrates to one :
+Where $\lambda$ outputs a measurement in Photo-elections per second. Because $f(t)$ integrates to one :
 
 $$
     \int  \lambda(t) \ dt = N_{expected}
@@ -195,10 +195,18 @@ $$
 The ```Connector.py``` file contains the ```Connector``` class. The ```Connector``` class contains method ```connect()```, which takes in a unloaded, open circuit voltage array and returns a signal loaded with the load impedance. Reflections and attenuation are not taken into account. As a result, this class simply acts as a voltage divider:
 
 $$
-   V_{loaded}(t) = (V_{in}(t) - V_baseline) \frac{ Z_{load} }{ Z_{load} + Z_{source} } 
+   V_{loaded}(t) = (V_{in}(t) - V_{baseline}) \frac{ Z_{load} }{ Z_{load} + Z_{source} } 
 $$
 
+## ```Amplifier.py```
+The ```Amplifier.py``` file contains the ```Amplifier``` class. The ```Amplifier``` class contains method ```amplify()```, which takes in a loaded voltage array and returns a open circuit Thevenin voltage signal. To do this, we first apply the gain passes in by the user:
 
+$$
+   V_{pulse}(t) = V_{in}(t) - V_{baseline}
+   V_{amplified}(t) = A_v V_{pulse}
+$$
+
+Where A_v is the voltage gain. Gain may either be inputted as a unit-less quantity or in units of decibels. If it gain is given in decibels, it will be converted into a linear, unit-less multiplier. 
 
 
 
