@@ -26,6 +26,8 @@ class CircuitAnalyzer:
 
         self.validate_stage(time_array, voltage_array, polarity)
 
+        reflection_info = None
+        
         if characteristic_impedance is not None and load_impedance is not None:
             reflection_info = self.get_reflection_info(characteristic_impedance, load_impedance, source_impedance)
 
