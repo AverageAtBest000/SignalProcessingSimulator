@@ -304,47 +304,6 @@ class CircuitAnalyzer:
         data = stage["measurements"]
         return data["polarity"] * ( stage["voltage_array"] - data["baseline_volts"])
 
-    def calculate_delay(self, reference, output):
-        if self.delay_method == "peak":
-            return (
-                output["measurements"]["peak_time_seconds"]
-                - reference["measurements"]["peak_time_seconds"]
-            )
-
-        if self.delay_method != "correlation":
-            raise ValueError(
-                'delay_method must be "peak" or "correlation"'
-            )
-
-        reference_time = reference["time_array"]
-        reference_voltage = self.get_oriented_voltage(reference)
-
-        output_voltage = np.interp(
-            reference_time,
-            output["time_array"],
-            self.get_oriented_voltage(output),
-            left=0.0,
-            right=0.0,
-        )
-
-        reference_voltage = reference_voltage - np.mean(reference_voltage)
-        output_voltage = output_voltage - np.mean(output_voltage)
-
-        correlation_values = signal.correlate(
-            output_voltage,
-            reference_voltage,
-            mode="full",
-            method="fft",
-        )
-        lags = signal.correlation_lags(
-            len(output_voltage),
-            len(reference_voltage),
-            mode="full",
-        )
-
-        lag = int(lags[np.argmax(correlation_values)])
-        sample_period = float(np.median(np.diff(reference_time)))
-        return lag * sample_period
     
     @classmethod
     def get_window_samples(cls, time_array, voltage_array, window):

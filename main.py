@@ -105,6 +105,8 @@ for stage_name in analyzer.stages:
     analyzer.display_diagnostics(stage_name)
 
 
+print(analyzer.get_report())
+
 plt.plot(time_array, voltage_array, color="green", label="Original Signal")
 plt.plot(time_array, signal_b, color="blue", label="Split Channel 2 : not loaded")
 plt.step(digitized_time, reconstructed_voltage, color="black", label="Digitized Split Channel 2")
