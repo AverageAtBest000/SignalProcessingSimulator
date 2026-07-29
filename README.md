@@ -119,7 +119,7 @@ A for loop is then used to sum the signal produced by each photo-electron at eac
 
 
 ## ```Splitter.py```
-The ```Splitter.py``` file contains the ```Slpitter``` class. The ```Slpitter``` class contains method ```split()```, which returns two open circuit voltage arrays (one for each branch), as well as their corresponding impedance values in order to apply load to the open circuit later. To do this, we first calculate the impedance of the source branch : 
+The ```Splitter.py``` file contains the ```Splitter``` class. The ```Splitter``` class contains method ```split()```, which returns two open circuit voltage arrays (one for each branch), as well as their corresponding impedance values in order to apply load to the open circuit later. To do this, we first calculate the impedance of the source branch : 
 
 $$
     Z_{SourceBranch} = Z_{SourceImpedance} + R_1 
@@ -199,14 +199,36 @@ $$
 $$
 
 ## ```Amplifier.py```
-The ```Amplifier.py``` file contains the ```Amplifier``` class. The ```Amplifier``` class contains method ```amplify()```, which takes in a loaded voltage array and returns a open circuit Thevenin voltage signal. To do this, we first apply the gain passes in by the user:
+The ```Amplifier.py``` file contains the ```Amplifier``` class. The ```Amplifier``` class contains method ```amplify()```, which takes in a loaded voltage array and returns a open circuit Thevenin voltage signal. To do this, we first apply the gain passed in by the user:
 
 $$
    V_{pulse}(t) = V_{in}(t) - V_{baseline}
    V_{amplified}(t) = A_v V_{pulse}
 $$
 
-Where A_v is the voltage gain. Gain may either be inputted as a unit-less quantity or in units of decibels. If it gain is given in decibels, it will be converted into a linear, unit-less multiplier. 
+Where A_v is the voltage gain. Gain may either be inputted as a unit-less quantity or in units of decibels. If gain is given in decibels, it will be converted into a linear, unit-less multiplier. 
+
+$$
+   \max(V)
+$$
+
+## ```ConstantFractionDiscriminator.py```
+The ```ConstantFractionDiscriminator.py``` file contains the ```ConstantFractionDiscriminator``` class. The ```Amplifier``` class contains method ```amply()```, which takes in a loaded voltage array and returns an array of the crossing times and indexes of the input signal. We start the process by removing the signal baseline :
+
+
+$$
+   V_{pulse}(t) = V_{in}(t) - V_{baseline}
+$$
+
+With V_{pulse}(t), we derive two other signals for use in analysis 
+
+
+
+
+
+
+
+
 
 
 
