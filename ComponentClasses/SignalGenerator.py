@@ -89,16 +89,16 @@ class Generator:
             t_0 (float): Time at which the pulse begins 
             Tau_fall (float): Constant that controls the decay time of the scintillator double exponential. A larger value will make the signal take longer to decay.
             Tau_rise (float): Constant that controls the rise time of the scintillator double exponential. A larger value will make the signal take longer to reach its peak. 
-            Tau_fall_spe (float):
-            Tau_rise_spe (float):
+            Tau_fall_spe (float): Constant that controls the decay time of the double exponential of a single photoelectron. A larger value will make the signal take longer to decay.
+            Tau_rise_spe (float): Constant that controls the rise time of the double exponential of a single photoelectron. A larger value will make the signal take longer to reach its peak.
             polarity (int): Polarity of the signal (1 or -1)
             SPE_pulse_area (float): The area under the curve of a single photo-electron pulse 
-            relative_gain_sigma (float): Standard deviation of photoelctron signal intensity
-            transit_time_spread_fwhm (float): 
+            relative_gain_sigma (float): Standard deviation of photoelctron signal intensity.
+            transit_time_spread_fwhm (float): Variation in time it takes photoelectrons to reach the anode of the PMT after entering the tube. 
             random_seed (int): Seed used to generate samples from probability spreads (posson and uniform)
-            pulse_area_method (str) : Method for calculating pulse area under a photo-electron signal. May be "direct" or "estimate_from_g_r, which estimates using the PMT's gain and termination resistance"
-            terminator_resistance ()
-            PMT_gain (float): Optional parameter used if pulse area is estimated instead of passe in directly 
+            pulse_area_method (str): Method for calculating pulse area under a photo-electron signal. May be "direct" or "estimate_from_g_r, which estimates using the PMT's gain and termination resistance"
+            terminator_resistance (float): Optional parameter descrinbing the resistance of the resistor used to estimate the SPE pulse area
+            PMT_gain (float): Optional parameter used if pulse area is estimated instead of passed in directly 
             SPE_pulse_area_is_open_circuit (bool): Optional parameter  
             measurement_impedance
         Return:
@@ -137,10 +137,8 @@ class Generator:
            pulse_area = self.convert_to_open_circuit_pulse_area( measured_pulse_area=pulse_area, measurement_impedance=measurement_impedance)
 
 
-        #for every time step
         for i in range(len(photoelectron_arrivals)):
             
-            #for every photon that arrived in that time step
             for photoelectron in range(photoelectron_arrivals[i]):
 
                 relative_gain = np.clip(rng.normal(1.0, relative_gain_sigma), 0, a_max=None)
@@ -183,7 +181,6 @@ class Generator:
         waveform = np.zeros(len(time_array))
 
         count = 0
-
         for event_time in event_times:
 
             current_wave = self.get_PMT_signal( expected_photoelectrons = expected_photoelectrons,

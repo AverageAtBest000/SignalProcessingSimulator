@@ -43,10 +43,10 @@ class Splitter:
         
         Args:
             time_array (np.ndarray): Array of signal's time values in seconds.
-            open_volts_array (np.ndarray): Corresponding open circuit voltage values to be fed into branch 1 at each time bin in time_array.
+            open_volts_array (np.ndarray): Corresponding open circuit voltage values to be fed into the input branch at each time bin in time_array.
             load_1_impedance (float): Impedance of the load connected to the first branch.
             load_2_impedance (float): Impedance of the load connected to the second branch.
-            source_impedance (float): Impedance of the device connected to the first branch 
+            source_impedance (float): Impedance of the device driving the signal into the input branch
             signal_baseline (float): Signal baseline. May be 0.0 or a DC offset 
 
         Return:
