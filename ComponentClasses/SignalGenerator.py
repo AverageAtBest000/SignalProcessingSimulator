@@ -146,7 +146,7 @@ class Generator:
                 gaussian_offset = 0 if transit_time_spread_fwhm < 0 else rng.normal(0, TTS_standard_dev) 
                 photoelectron_time = time_array[i] + gaussian_offset
 
-                signal += self.get_photoelectron_voltage(
+                contribution = self.get_photoelectron_voltage(
                     polarity = polarity,
                     SPE_pulse_area = pulse_area,
                     relative_gain = relative_gain,
@@ -159,7 +159,9 @@ class Generator:
                     )
                 )
 
-        return signal  
+                signal += contribution 
+
+        return signal
 
 
     def get_PMT_event_train( self, time_array : np.ndarray, 
