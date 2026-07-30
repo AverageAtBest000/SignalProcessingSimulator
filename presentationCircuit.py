@@ -22,7 +22,7 @@ num_samples = 10_000
 time_array = np.linspace(0, num_seconds, num_samples)
 
 
-amplifier = Amplifier(  gain = 5, 
+amplifier = Amplifier(  gain = 2, 
                         gain_units = "unitless", 
                         input_impedance = 50, 
                         output_impedance = 50, 
@@ -33,7 +33,9 @@ amplifier = Amplifier(  gain = 5,
                         high_cutoff_freq = 250e6 
                         )
 
-digitizer = Digitizer(input_impedance = 60)
+digitizer = Digitizer(input_impedance = 50)
+
+rng = np.random.default_rng(seed = 60)
 
 """====================== GENERATOR INITIALIZATION ======================"""
 generator_output_impedance = 50
@@ -58,6 +60,17 @@ generated_signal  = generator.get_PMT_signal(
                                             random_seed = 1
                                             ) 
 
+generated_signal  = generator.get_PMT_event_train(
+                                            expected_photoelectrons = expected_photoelectrons,
+                                            time_array = time_array,
+                                            event_times = rng.uniform(low=0.0, high = num_seconds * (3/4), size=3),
+                                            Tau_fall = np.array([Tau_fall, Tau_fall, Tau_fall]),
+                                            Tau_rise = np.array([Tau_rise, Tau_rise, Tau_rise]),
+                                            Tau_rise_spe = np.array([Tau_rise_spe, Tau_rise_spe, Tau_rise_spe]),
+                                            Tau_fall_spe = np.array([Tau_fall_spe, Tau_fall_spe, Tau_fall_spe]),
+                                            polarity = polarity,
+                                            random_seeds = np.array([1,2,3])
+                                            ) 
 
 """====================== CABLE 1 INITIALIZATION ======================"""
 
@@ -94,7 +107,7 @@ cable_2_length_meters = 5
 cable_to_digitizer = Cable( length_m = cable_2_length_meters,
                             velocity_factor = velocity_factor,
                             attenuation_db_per_m = attenuation_db_per_m,
-                            characteristic_impedance = cable_characteristic_impedance
+                            characteristic_impedance = 100
                             )
 
 _, digitizer_input_signal = cable_to_digitizer.propagation( time_array = time_array, 
