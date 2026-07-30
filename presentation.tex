@@ -1,0 +1,232 @@
+\documentclass[aspectratio=169, 10pt] {beamer}
+\usetheme[faculty=phil]{fibeamer}
+\usepackage[utf8]{inputenc}
+\usepackage[main=english,]{babel}
+\usepackage{subcaption}
+
+\makeatletter
+\renewcommand\fibeamer@includeLogo[2][]
+\makeatother
+
+\title{A Tool for Signal Chain Simulation in Particle Physics}
+\subtitle{Octavio Gamez and Desiree Martinez} 
+\author{July 31st, 2026}
+
+\usepackage{ragged2e}  % `\justifying` text
+\usepackage{booktabs}  % Tables
+\usepackage{tabularx}
+\usepackage{tikz}      % Diagrams
+\usetikzlibrary{calc, shapes, backgrounds}
+\usepackage{amsmath, amssymb}
+\usepackage{url}       % `\url`s
+\usepackage{listings}  % Code listings
+\frenchspacing
+\includegraphics[trim=left bottom right top, clip]{filename}
+
+\begin{document}
+\frame[c]{\maketitle}
+
+%Slide 2
+    \begin{frame}{Motivation}
+    \large
+    Experiments focus on the signal to the digitizer, but hardly consider how the signal travels and what happens to the signal\\
+
+    %ADD PICTURE OF LIKE A PMT TO DIGITIZER TYPA TOOL IDK
+    \end{frame}
+
+
+%Slide 3
+    \begin{frame}{Gaps in Pre-Existing Tools}
+    SPICE simulators are accurate but not ideal or realistic during the early planning stages of an experiment\\
+
+    %ADD PICTURE OF A SPICE SIMULATOR 
+
+    \begin{figure}
+        \hfill
+        \includegraphics[width=0.7\linewidth]{SPICE.jpg}
+        \caption{Caption}
+        \label{fig  1:placeholder}
+    \end{figure}
+
+
+    \small
+    Figure 1: Electrical Engineering Oli Glaser
+%I cant figure out how to show this, i need the pic to be big but my text wont freaking go to the left side of the screen
+    
+    %DURING PRESENTING WE CAN TALK ABOUT HOW IT IS ACCURACT BUT REQUIRES A FULLY DETAILED SCHEMATIC AND YEAH YA FEEL?
+    %MAYBE GO ONTO HOW THIS IS ONE OF THE OPTIONS BUT THE OTHER ONE IS TO JUST KEEP GOING WITH YOUR GUT AND  PAST EXPERIENCES WHICH ISNT IDEAL
+    \end{frame}
+
+
+%Slide 4
+    \begin{frame}{Project Goal}
+    \large
+    Design an open source tool for the pre-planning stage of an experiment that will report reflections, distortions, and signal loss
+
+    %IDK WHAT PICTURE YOUD WANT TO ADD
+    \end{frame}
+
+
+%Slide 5 (MAYBE COULD ADD IDK IF IT WOULD BE RELEVENT BUT IT DONT MATTER
+%    \begin{frame}{Understanding a signal}
+%    Experimenters try to understand things they see in signals; 
+%    \begin{itemize}
+%        \item Source
+%        \item Timing
+%        \item Reflections
+%        \item Distortions
+%        \item Signal Loss
+%    \end{itemize}
+
+    %ADD PIC OF SIGNAL AND POINT OUT THE PARTS OF THE SIGNAL IDK
+%    \end{frame}
+%GET RID OF THE PERCENTAGE SIGNS IF YOU WANT TO ADD IT
+
+
+
+\begin{frame}{PMT Signal}
+$$
+f(t) = A \cdot \left[ e^{-\frac{t}{\tau_{\text{fall}}}} - e^{-\frac{t}{\tau_{\text{rise}}}} \right]
+$$
+Where:
+\begin{align*}
+f(t) &\quad\to \text{output values at a specific time } (t) \\
+A    &\quad\to \text{an arbitrary scaling factor} \\
+t    &\quad\to \text{time} \\
+\tau_{\text{rise}} &\quad\to \text{Time constant controlling the signal rise time}\\
+\tau_{\text{fall}} &\quad\to \text{Time constant controlling the signal fall time}
+\end{align*}
+
+% add a picture of what a PMT signal looks like
+% maybe can talk about the fast rise with a slow fall time along with a negative going pulse
+        %like we can actually talk about it or we can put in on the slide and still talk about it
+\end{frame}
+
+
+
+%Slide 6
+\begin{frame}{Impedance}
+Impedance Equation:
+$$Z_0 = \sqrt{\frac{R + j\omega L}{G + j\omega C}}$$
+\end{frame}
+
+
+
+%Slide 7
+\begin{frame}{Reflections}
+    Reflection Coefficient:
+$$\Gamma = \frac{(Z_{\text{load}} - Z_0)}{(Z_{\text{load}} + Z_0)}$$
+
+ A matched connection ($Z_0$ = $Z_{\text{load}}$) gives no reflection ($\Gamma$ = 0). An open or short end cable yields:
+
+$$\Gamma_{\text{open}} = \lim_{Z_{\text{load}} \to \infty} \frac{Z_{\text{load}} - Z_0}{Z_{\text{load}} + Z_0} = +1$$
+
+for an open cable, and: 
+
+$$\Gamma_{\text{short}} =  \frac{0- Z_0}{0 + Z_0} = -1$$
+\end{frame}
+
+
+
+
+%Slide 8
+\begin{frame}{Transmission Line}
+Propagation delay is given by:
+
+$$t_{delay} = \frac{L}{v_f \cdot c}$$
+
+Where:
+\begin{align*}
+t_{delay} &\quad\to \text{the signal's shift in seconds} \\
+L   &\quad\to \text{length of the cable in meters} \\
+v_f    &\quad\to \text{velocity factor (ratio of transmit speed to the speed of light)} \\
+c    &\quad\to \text{the speed of light)} \\
+\end{align*}
+\end{frame}
+
+
+
+\begin{frame}{PMT}
+    PMT &\quad\\  
+
+    \begin{figure}
+        \centering
+        \includegraphics[trim=3cm 2cm 1.9cm 3cm, clip, width=1.0\linewidth]{PMTSignal.png} 
+        \caption{Synthetic PMT Pulse}
+        \label{fig:placeholder}
+    \end{figure}
+    
+\end{frame}
+
+
+
+
+\begin{frame}{Cable}
+    PMT \to \text{1M 50 $\Omega$ cable} \\
+     \begin{figure}
+        \centering
+        \includegraphics[trim=3cm 2cm 1.9cm 3cm, clip, width=1.0\linewidth]{AMP_IN.png} 
+        \caption{Synthetic PMT Pulse}
+        \label{fig:placeholder}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Amplifier}
+    PMT \to \text{1M 50 $\Omega$ cable} \to Amplifier \\
+     \begin{figure}
+        \centering
+        \includegraphics[trim=3cm 2cm 1.9cm 3cm, clip, width=1.0\linewidth]{AMP_OPEN_CIRCUIT.png} 
+        \caption{Synthetic PMT Pulse}
+        \label{fig:placeholder}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Cable}
+    PMT \to \text{50 $\Omega$ cable} \to Amplifier \to \text{5M 50 $\Omega$ cable} \\
+     \begin{figure}
+        \centering
+        \includegraphics[trim=3cm 2cm 1.9cm 3cm, clip, width=1.0\linewidth]{DIG_ANALOG_INPUT.png} 
+        \caption{Synthetic PMT Pulse}
+        \label{fig:placeholder}
+    \end{figure}
+\end{frame}
+
+
+
+\begin{frame}{Next Steps}
+\begin{itemize}
+    \item Test the tool against real measurements to check accuracy and compare
+    \item Get it to support multiple reflections bouncing back and fourth
+    \item Add more components and source types
+    \item enhancing different features that are already implemented in our design
+\end{itemize}
+    
+\end{frame}
+
+
+\begin{frame}{Conclusion}
+    \begin{itemize}
+        \item 2 paths when planning an analog signal:
+        \begin{itemize}
+            \item experience-based estimations
+            \item building a fully designed simulation
+        \end{itemize}
+        \item This project was done to add another path
+        \begin{itemize}
+            \item open-source tool
+            \item has a source and components that could distort a signal
+            \item giving back results before hardware is built
+            \begin{itemize}
+                \item reflections, distortion, signal loss
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+    
+\end{frame}
+
+
+
+
+\end{document}

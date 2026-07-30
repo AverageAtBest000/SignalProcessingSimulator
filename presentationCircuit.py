@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-plt.style.use('dark_background')
+# plt.style.use('dark_background')
 from ComponentClasses import (  Amplifier, Connector, 
                                 Digitizer, 
                                 Cable,
@@ -138,21 +138,21 @@ plt.plot(
 plt.plot(
     time_array * 1e9,
     amplifier_input_signal * 1e3,
-    color = "cyan",
+    color = "purple",
     label = "Amplifier input after 1 m cable"
 )
 
 plt.plot(
     time_array * 1e9,
     amplified_signal * 1e3,
-    color = "white",
+    color = "green",
     label = "Amplifier open-circuit output"
 )
 
 plt.plot(
     time_array * 1e9,
     digitizer_input_signal * 1e3,
-    color = "orange",
+    color = "navy",
     label = "Digitizer analog input"
 )
 
@@ -163,9 +163,9 @@ plt.step(
     label = "Digitizer samples"
 )
 
-plt.xlabel("Time (ns)")
-plt.ylabel("Voltage (mV)")
-plt.title("PMT Analog Signal Chain")
+plt.xlabel("Time (ns)", fontsize = 20)
+plt.ylabel("Voltage (mV)", fontsize = 20)
+plt.title("PMT Analog Signal Chain", fontsize = 20)
 
 plt.legend()
 # plt.grid(True)
