@@ -1,9 +1,17 @@
 import numpy as np
 import scipy.constants as constants
-
+import scipy.signal as signal
 class Cable:
     
-    def __init__(self, length_m: float, velocity_factor: float, attenuation_db_per_m: float, characteristic_impedance: float = 50.0):
+    def __init__(   self,
+                    length_m: float,
+                    velocity_factor: float,
+                    attenuation_db_per_m: float,
+                    characteristic_impedance: float = 50.0,
+                    attenuation_reference_frequency: float = 100e6,
+                    discontinuity_impedance: float = None,
+                    discontinuity_distance_m: float = None
+                    ):
         
         """
         Store the Cable's physical characteristics 
@@ -19,6 +27,11 @@ class Cable:
         self.length_m = length_m
         self.velocity_factor = velocity_factor
         self.attenuation_db_per_m = attenuation_db_per_m
+        self.attenuation_reference_frequency = attenuation_reference_frequency
+        self.discontinuity_impedance = discontinuity_impedance
+        self.discontinuity_distance_m = discontinuity_distance_m        
+
+
 
     def validate_constructor_params(self, characteristic_impedance, length_m, velocity_factor, attenuation_db_per_m):
         if not np.isfinite(characteristic_impedance) or characteristic_impedance <= 0:
@@ -31,7 +44,15 @@ class Cable:
             raise ValueError("attenuation_db_per_m must be finite and not negative")
 
 
-    def propagation(self, time_array: np.ndarray, open_circuit_voltage_array: np.ndarray, source_impedance: float, load_impedance: float, signal_baseline: float, max_round_trips: int) ->  tuple[np.ndarray, np.ndarray ] :
+    def propagation(self,
+                    time_array: np.ndarray,
+                    open_circuit_voltage_array: np.ndarray,
+                    source_impedance: float,
+                    load_impedance: float,
+                    signal_baseline: float,
+                    max_round_trips: int,
+                    minimum_reflection_voltage: float = 0.0
+                    ) ->  tuple[np.ndarray, np.ndarray ] :
             
         """
         Calculate and return the effect on a given signal after it has traveled through a cable.
@@ -43,6 +64,7 @@ class Cable:
             load_impedance (float): impedance of the load component 
             signal_baseline (float): Signal baseline. May be 0.0 or a DC offset 
             max_round_trips (int): the maximum amount of times a signal can travel from its source, down the cable, and back.
+            minimum_reflection_voltage (float): Stop adding reflections when the largest magnitude of the next incident wave is below this voltage.
         Returns:
             time_array (np.ndarray): Original time array.
             loaded_output_voltage (np.ndarray): Voltage seen at the far end of the cable with the load applied
@@ -71,7 +93,7 @@ class Cable:
 
         launched_wave  = pulse_voltage * launch_factor
 
-        current_incident_wave = launched_wave * attenuation
+        current_incident_wave = self.apply_frequency_dependent_attenuation( time_array = time_array, voltage_array = launched_wave, distance_m = self.length_m )
 
         current_arrival_delay = delay
 
@@ -79,7 +101,7 @@ class Cable:
         
         for round_trip in range(max_round_trips):
             
-            if current_arrival_delay > time_array[-1] - time_array[0]:
+            if current_arrival_delay > time_array[-1] - time_array[0] or (round_trip > 0 and np.max(np.abs(current_incident_wave)) < minimum_reflection_voltage):
                 break
             
             delayed_incident_wave = self.delay_wave(
@@ -92,9 +114,13 @@ class Cable:
 
             output_voltage_change = output_voltage_change + load_contribution
 
-            current_incident_wave =  current_incident_wave * load_reflection * source_reflection * (attenuation ** 2)
+            current_incident_wave =  current_incident_wave * load_reflection * source_reflection
 
             current_arrival_delay = current_arrival_delay + (2 * delay)
+
+            if self.discontinuity_impedance is not None:
+                discontinuity_contribution = self.get_discontinuity_contribution( time_array = time_array, launched_wave = launched_wave, source_reflection = source_reflection, load_reflection = load_reflection )
+
 
         loaded_output_voltage = signal_baseline + output_voltage_change
 
@@ -145,4 +171,57 @@ class Cable:
         delayed_wave = np.interp( x = new_time_array, xp = time_array, fp = voltage_array, left = 0, right = 0)
 
         return delayed_wave
+
+    def apply_frequency_dependent_attenuation( self, time_array, voltage_array, distance_m ):
+        
+        time_delta = time_array[1] - time_array[0]
+        frequencies = np.fft.rfftfreq(len(voltage_array), d=time_delta)
+        voltage_spectrum = np.fft.rfft(voltage_array)
+
+        frequency_ratio = np.zeros(len(frequencies))
+        positive_frequency = frequencies > 0
+
+        frequency_ratio[positive_frequency] = np.sqrt( frequencies[positive_frequency] / self.attenuation_reference_frequency)
+
+        attenuation_db = ( self.attenuation_db_per_m * distance_m * frequency_ratio )
+
+        attenuation_factor = 10 ** (-attenuation_db / 20)
+
+        attenuated_spectrum = voltage_spectrum * attenuation_factor
+
+        attenuated_voltage = np.fft.irfft( attenuated_spectrum, n=len(voltage_array) )
+
+        return attenuated_voltage
     
+
+    def get_discontinuity_contribution( self, time_array, launched_wave, source_reflection, load_reflection ):
+        discontinuity_reflection =  ( self.discontinuity_impedance - self.characteristic_impedance) / ( self.discontinuity_impedance + self.characteristic_impedance)
+
+        propagation_speed = self.velocity_factor * constants.speed_of_light
+        
+
+        echo_delay =  self.length_m + 2 * self.discontinuity_distance_m  / propagation_speed
+
+        echo_distance =  self.length_m + 2 * self.discontinuity_distance_m
+        
+        echo_wave =  launched_wave * discontinuity_reflection * source_reflection 
+
+        echo_wave = self.apply_frequency_dependent_attenuation( time_array=time_array, voltage_array=echo_wave, distance_m=echo_distance )
+
+        delayed_echo = self.delay_wave( time_array=time_array, voltage_array=echo_wave, delay=echo_delay )
+
+        return delayed_echo * (1 + load_reflection)
+
+
+    def delay_wave(self, time_array, voltage_array, delay):
+        new_time_array = time_array - delay
+
+        delayed_wave = np.interp(
+            x=new_time_array,
+            xp=time_array,
+            fp=voltage_array,
+            left=0,
+            right=0
+        )
+
+        return delayed_wave

@@ -13,8 +13,11 @@ class Amplifier:
                  max_voltage_out, 
                  slew_rate_up = np.inf, 
                  slew_rate_down = -np.inf, 
+                 input_noise_rms=0.0,
+                 output_noise_rms=0.0,
                  low_cutoff_freq = None, 
-                 high_cutoff_freq = None
+                 high_cutoff_freq = None,
+                 random_seed = None
                 ):
                 
 
@@ -30,6 +33,8 @@ class Amplifier:
             max_voltage_out (float): maximum voltage outputed by the amplifier
             slew_rate_up (float): slew rate when signal has a positive gradient
             slew_rate_down (float): slew rate when signal has a negative gradient
+            input_noise_rms (float): RMS noise voltage added before gain.
+            output_noise_rms (float): RMS noise voltage added after gain.
             low_cutoff_freq (float): cutoff for the high pass filter
             high_cutoff_freq (floar): cutoff for the low pass filter
         """
@@ -47,7 +52,9 @@ class Amplifier:
         self.min_voltage_out = min_voltage_out
         self.slew_rate_up = slew_rate_up
         self.slew_rate_down = slew_rate_down
-
+        self.input_noise_rms = input_noise_rms
+        self.output_noise_rms = output_noise_rms
+        self.random_seed = random_seed
 
     def amplify(self, time_array: np.ndarray, loaded_voltage_array: np.ndarray, signal_baseline: float, output_baseline: float = 0.0) -> tuple[np.ndarray, np.ndarray]:
         
@@ -65,8 +72,10 @@ class Amplifier:
             open_circuit_aplified_voltage (np.ndarray): Array of voltage values after amplification without the load applied 
         
         """
+        rng = np.random.default_rng(self.random_seed)
 
         self.validate_params(time_array, loaded_voltage_array)
+
         time_delta = time_array[1] - time_array[0]
 
         sampling_frequency = 1 / time_delta
@@ -76,6 +85,9 @@ class Amplifier:
         amplified_voltage = loaded_voltage_array - signal_baseline
         
         amplified_voltage = amplified_voltage * self.gain
+
+        input_noise = rng.normal( loc=0.0, scale=self.input_noise_rms, size=len(amplified_voltage) )
+
 
         if self.low_cutoff_freq is not None:
             if self.low_cutoff_freq < nyquist_frequency:    
@@ -91,8 +103,8 @@ class Amplifier:
 
         open_circuit_amplified_voltage = amplified_voltage + output_baseline
 
-        open_circuit_amplified_voltage = np.clip(open_circuit_amplified_voltage, self.min_voltage_out, self.max_voltage_out)
-
+        open_circuit_amplified_voltage = self.apply_soft_saturation( voltage_array = open_circuit_amplified_voltage, output_baseline = output_baseline, min_voltage_out = self.min_voltage_out, max_voltage_out = self.max_voltage_out)
+        
         open_circuit_amplified_voltage = self.apply_slew_rates(open_circuit_amplified_voltage, self.slew_rate_up, self.slew_rate_down, time_delta)
 
         return time_array, open_circuit_amplified_voltage
@@ -203,3 +215,21 @@ class Amplifier:
         tao_L = 1 / (2 * np.pi * frequency)
         alpha = 1 - np.exp( (-time_delta) / tao_L )
         return alpha
+
+
+    @classmethod
+    def apply_soft_saturation( cls, voltage_array, output_baseline, min_voltage_out, max_voltage_out ):
+
+        soft_saturated_voltage = np.zeros(len(voltage_array))
+
+        positive_values = voltage_array >= output_baseline
+        negative_values = voltage_array < output_baseline
+
+        positive_headroom = max_voltage_out - output_baseline
+        negative_headroom = output_baseline - min_voltage_out
+
+        soft_saturated_voltage[positive_values] = ( output_baseline + positive_headroom * np.tanh( ( voltage_array[positive_values] - output_baseline ) / positive_headroom ) )
+
+        soft_saturated_voltage[negative_values] = ( output_baseline + negative_headroom * np.tanh( ( voltage_array[negative_values] - output_baseline ) / negative_headroom ) )
+
+        return soft_saturated_voltage
