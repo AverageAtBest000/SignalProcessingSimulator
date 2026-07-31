@@ -10,6 +10,7 @@ This project allows an experimenter to design/pre-plan a simulated analog to dig
    ```bash
    git clone https://github.com/AverageAtBest000/SignalProcessingSimulator
    cd SignalProcessingSimulator
+   git checkout ab7c74da039568ae7cabb6e056616ab832785098
    ```
    
 2. **Set up a virtual environment (Recommended):**
