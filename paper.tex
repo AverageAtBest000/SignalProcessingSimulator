@@ -1,5 +1,6 @@
-Martinez\documentclass[11pt]{article}
+\documentclass[10pt]{article}
 
+\usepackage[margin=1.5in]{geometry}
 \usepackage{fullpage}
 \usepackage{graphicx}
 \usepackage{hyperref}
@@ -16,26 +17,26 @@ Martinez\documentclass[11pt]{article}
 \maketitle
 
 \begin{abstract}
-
-In particle physics, signal processing is very important in the electronics chain and for the pre-planning phases of an experiment. However, by going from detector to digitizer, experimenters can use a full SPICE simulator to get their signal, but doing so requires a detailed schematic of electrical components, which is impractical during the early design phase of an experiment. Our solution to this is an open source tool that experimenters can use to plan an analog signal to the digitizer path while going through specified components to see how the waveform distorts from the original signal that was produced.
+%he really wants us to quote in text sources and to cite stuff fyi
+In particle physics, signal processing is very important in the electronics chain and for the pre-planning phases of an experiment. SPICE is one of the widely used tools used to predict the performance of a circuit[1]. However, by going from detector to digitizer, experimenters can use a full SPICE simulator to get their signal, but doing so requires a detailed schematic of electrical components, which is impractical during the early design phase of an experiment. Our solution to this is the creation of an open source tool that experimenters can use to plan an analog signal to the digitizer path while going through specified components to see how the waveform distorts from the original signal that was produced.
   
 \end{abstract}
 
 \section{Introduction}
 
-Planning the analog signal path isn't thought to be as important of a step when doing signal processing. Experimenters usually start from the detector (photomultiplier tube, drift chamber, or pixel detectors such as GEMS), and give a brief thought of how the signal will travel from the source to the digitizer. The signal would travel through cables, splitters, amplifiers, and discriminators and would be built based on previous experiments without truly understanding the effect it could have on the signal. Using this approach does work well for those familiar with the hardware and setups they know well, but fails to anticipate problems such as reflections that can corrupt timing, signal loss due to long cables, or distortion that sneakily messes up a fast pulse before these problems show up in real data.
+In the early planning stages of an experiment, the analog signal path is often considered at a high level and later refined. Experimenters usually start from the detector (photomultiplier tube, drift chamber, or gaseous detectors such as GEMs), and give a brief thought of how the signal will travel from the source to the digitizer. The signal would travel through cables, splitters, amplifiers and discriminators, and be built upon previous experiments without a grasp on possible signal distortion. Using this approach works well for those familiar with the hardware and setups they know well, but fails to anticipate problems such as reflections caused by an impedance mismatch [5] or attenuation due to signal propagation through a cable[6]. 
 
-There are tools to analyze the path of the analog signal to the digitizer with high precision. Experimenters can use a full SPICE simulator that can accurately find the distortions in the signal from the different components it runs through. But getting this level of accuracy requires a detailed schematic of all the electrical components that are involved, which would be unrealistic for the pre-planning phase of an experiment. Because of this, experimenters are left between choosing intuition from past experiments or building a complete circuit simulation to get their results.
+There are tools that already exist to analyze the path of the analog signal to the digitizer with high precision. Experimenters can use a full SPICE simulator that can accurately find the distortions in the signal from the different components it runs through. But getting this level of accuracy requires a detailed schematic of all the electrical components that are involved, an unrealistic endeavor for the pre-planning phase of an experiment. Experimenters are left between choosing intuition from past experiments or building a complete circuit simulation to get their results.
 
-This project is to fix that gap with an open source tool that is designed specifically for the pre-planning stage of the experiment. This tool is used to let an experimenter describe their signal generator and use it through different components to the digitizer. Depending on what the experimenter chooses, the signal to run through our tool will calculate the predicted outcome of the final result of the signal. This tool will help identify whether reflections occur along with how large they will be, how much the waveform will distort by the time it reaches the digitizer, and how much signal amplitude could be taken or added to the original signal. The goal of this tool is to build something simple enough to use during early planning but also sturdy enough for experimenters to know what they want before building anything.
+This project is to fix that gap with an open source tool that is designed specifically for the pre-planning stage of the experiment. This tool is used to let an experimenter describe their signal generator and use it through different components to the digitizer. Depending on what the experimenter chooses, the signal to run through our tool will calculate the predicted outcome of the final result of the signal. This tool will help identify whether reflections occur along with how large they will be, how much the waveform will distort by the time it reaches the digitizer, and how much signal amplitude could be taken or added to the original signal. The goal of this tool is to construct a tool simple and sturdy enough to be useful for experimenters in the planning phase before construction.
 %-------------------------------------------------------------
 \section{Background}
 
-To understand how our tool can model a signal path to the digitizer, it helps to understand the physical behavior of each piece through which the signal will be filtered. This can include the shape of the signal at its source, what happens as it moves through cables and components, to how it is eventually timed and measured. The following sections will talk more about these concepts.
+To understand how our tool can model a signal path to the digitizer, it helps to understand the physical behavior of each filtering component. This can include the shape of the signal at its source, how individual components transform the signal, and how it is eventually timed and measured. The following sections will discuss more about these concepts.
 
 % Check the math and equations to make sure it all makes sense
 \subsection{PMT Signal}
-In short, a photomultiplier tube (PMT) is a device used to amplify low levels of light. A signal produced by a PMT may last anywhere from 1 to 50 ns. Photons strike at one end of the tube, which holds a photocathode. The photocathode then produces photoelectrons via the photoelectric effect; these are then further amplified by the successive dynodes before being collected by the anode in the form of current caused by the electron avalanche. When the current transits through a load resistor, a signal of voltage as a function of time is extracted. The pulse is fairly predictable: It has a rapid rise before experiencing slow decay. This shape is approximated with a bi-exponential function. There are many forms of the bi-exponential, one being:
+In short, a photomultiplier tube (PMT) is a device used to amplify low levels of light [2]. The signals produced are affected by the specific PMT hardware and the particular light source being used [2]. For our purposes, we focus on signals with characteristic times of approximately 1 to 50 ns; for our research we are focusing on this range. Photons strike at one end of the tube, which holds a photocathode. The photocathode then produces photoelectrons via the photoelectric effect; these are then further amplified by the successive dynodes before being collected by the anode in the form of current caused by the electron avalanche [2]. When the current transits through a load resistor, a signal of voltage as a function of time is extracted. The pulse is fairly predictable: It has a rapid rise before experiencing slow decay. This shape is approximated with a bi-exponential function [3]. There are many forms of the bi-exponential, one being:
 
 $$
 f(t) = A \cdot \left[ e^{-\frac{t}{\tau_{\text{fall}}}} - e^{-\frac{t}{\tau_{\text{rise}}}} \right]
@@ -51,15 +52,20 @@ t    &\quad\to \text{time} \\
 \tau_{\text{fall}} &\quad\to \text{Time constant controlling the signal fall time}
 \end{align*}
 
-The two time constants, ${\tau_{\text{rise}}}$ and ${\tau_{\text{fall}}}$, can be adjusted to match a specific PMT. Real pulses vary in amplitude from one event to the next even under identical conditions.
+%he wsnts units for tau rise and tau fall
+
+The two time constants, ${\tau_{\text{rise}}}$ and ${\tau_{\text{fall}}}$, can be adjusted to match a specific PMT. Real pulses vary in amplitude from one event to the next even under identical conditions [2].
+
+%im thinking here we should add another mini sentence/paragraph about how right now we are only focuing on PMT signals like he said we should
 
 \subsection{Transmission Lines and Impedance matching}
-Characteristic impedance is defined as the ratio of voltage to current for a wave traveling through a transmission line. It is given by:
+
+Characteristic impedance is defined as the ratio of voltage to current for a wave traveling through a transmission line. It is given by [4]:
 
 $$Z_0 = \sqrt{\frac{R + j\omega L}{G + j\omega C}}$$
 
 
-A mismatch between the characteristic impedance and the load and source impedance along the circuit pathway will cause a signal to reflect. Signal reflection can be quantified by the reflection coefficient:
+A mismatch between the characteristic impedance and the load and source impedance along the circuit pathway will cause a signal to reflect [5]. Signal reflection can be quantified by the reflection coefficient:
 
 $$
 \Gamma = \frac{(Z_{\text{load}} - Z_0)}{(Z_{\text{load}} + Z_0)}
@@ -86,7 +92,7 @@ $$
 
 for a short cable. A reflection coefficient of 1 indicates that the entire signal was reflected. A reflection coefficient of -1 indicates that the entire signal was reflected and experienced an inversion in its polarity .
 
-Because a signal moves through a transmission line at a finite speed, propagation delay is introduced to the signal. Delay is given by:
+Because a signal moves through a transmission line at a finite speed, propagation delay is introduced [6]. Delay is given by:
 
 $$
 t_{delay} = \frac{L}{v_f \cdot c}
@@ -97,7 +103,7 @@ Where:
 t_{delay} &\quad\to \text{the signal's shift in seconds} \\
 L   &\quad\to \text{length of the cable in meters} \\
 v_f    &\quad\to \text{velocity factor (ratio of transmit speed to the speed of light)} \\
-c    &\quad\to \text{the speed of light)} \\
+c    &\quad\to \text{the speed of light} \\
 \end{align*}
 
 Using the time delay, a delayed signal can be expressed as:
@@ -107,8 +113,9 @@ V_{delayed}(t) = V_{orginal}(t - t_{delay})
 $$
 
 \subsection{Signal Integrity and Decay}
+% he wants average speeds for the reader aka how long does it travel in 1 ns
 
-Travel through a cable causes a signal to undergo attenuation. It is common to have cables that measureMartinez attenuation in decibels per meter. In order to convert this into a usable scalar we first multiply this quantity by the cable's length:
+Travel through a cable causes signal attenuation. It is common for cable manufacturers to characterize attenuation in decibels per unit length and as a function of frequency. This convention is seen in data sheets such as the LMR-400 [6]. In order to convert this into a usable scalar we first multiply this quantity by the cable's length [7]:
 
 $$
 A_{dB} = \alpha \cdot L
@@ -121,54 +128,450 @@ A_{dB} &\quad\to \text{the attenuation experienced by the signal in decibels} \\
 L   &\quad\to \text{length of the cable in meters} \\
 \end{align*}
 
-We can convert this into a usable, unitless, coefficient through base ten exponentiation: 
+We can convert this into a usable, unit-less, coefficient through base ten exponentiation: 
 
 $$
-
+A = 10^{-A_{dB}/20}
 $$
 
 
 \subsection{Timing Extraction}
 
-Somewhere in most signals, an analog pulse needs to be turned into a single moment that marks when a signal “arrived”. The simplest method is the leading/trailing edge discriminator, it does this by marking the moment the signal crosses a fixed voltage. It works, but a flaw is that larger pulses cross that point earlier than smaller pulses even if they both start at the same time. This is called a timing walk. But a constant fraction discriminator fixes this by triggering a fixed percentage of each pulses own height instead of the fixed voltage, that way the timing stays consistent no matter the pulse size.
+When measuring the properties of a signal, it is often helpful to determine the moment of arrival of said signal. The simplest way of doing this is by utilizing a leading/trailing edge discriminator, which detects the time at which a signal goes beyond or beneath a given threshold. This causes timing walk, as pulses may be recorded as crossing the threshold earlier than smaller pulses despite having arrived at the same time [8]. A leading edge discriminator can be represented mathematically by:  
 
-\subsection{Existing Modeling Tools}
-% MIGHT get rid of this subsection completely im not sure if its neccesary
-Circuit simulation tools already exist. SPICE-based simulators can model reflections, loss, and distortion. However, SPICE needs a fully detailed schematic like exact components and values, which is not ideal during the early phases of planning
+$$
+V(t_{LE}) = V_{th} \quad \text{where} \quad \frac{dV(t_{LE})}{dt} > 0
+$$
+
+A trailing edge discriminator can be represented mathematically as: 
+
+$$
+V(t_{TR}) = V_{th} \quad \text{where} \quad \frac{  dV(t_{TR})   } {dt} < 0
+$$
+
+%wants to know what "v" is and what is the time that we would record
+
+Another detector, the constant fraction discriminator, minimizes the amplitude-based timing errors for signals with similar rise times [8]. Triggering happens when an input signal reaches a fixed percentage of the peak height amplitude. This is often done by adding a delayed copy of the signal to another attenuated copy with reversed polarity :
+$$
+V_S(t) = V_in(t - t_d) - fV_{in}(t)
+$$
+
+the timing point can then be estimated using the zero crossing: 
+
+$$
+V_S(t_{CF}) = 0
+$$
+
+%wants us to expand on this equation
 %-------------------------------------------------------------
-\section{Methods/Process}
-In this project, we only have a set amount of components that the signal would run through before it reaches the digitizer: splitter, amplifier, leading/trailing edge discriminator, constant fraction discriminator, cables, connectors, and terminators.
-So when doing this project, we both worked on making classes in python for each of the components as well as making a signal generator (PMT Signal), circuit analyzer, and digitizer.
+\section{Methods}
+In this project, we present a set  of components that a signal may pass through before reaching a digitizer: splitter, amplifier, edge discriminators, constant fraction discriminators, cables, connectors, and terminators.
+When developing this project, we created classes in python for each of the components as well as making a signal generator (PMT Signal), circuit analyzer, and digitizer.
 
-\begin{figure}[!htbp]
-    \centering
-    \includegraphics[width=0.7\textwidth]{ComponentsClasses_Screenshot.png}
-    \caption{Component Classes}
-\end{figure}
+\subsection{Generator}
+In our model, we design a signal generator which serves to create synthetic PMT pulses. We pick $A$ to represent the expected number of photo-electrons to be emitted by the photocathode. To do this, we first normalize the unscaled bi-exponential in order to make its integral to infinity equal to one: 
+
+$$
+\int_{0}^{\infty} (e^{-\frac{t - t_0}{\tau_{\text{fall}}}} - e^{-\frac{t - t_0}{\tau_{\text{rise}}}} ) u(t- t_0)\,dt = \tau_{\text{fall}} - \tau_{\text{rise}}  
+$$
+
+Where $u$ is the step function. Dividing by the integral yields the equation: 
+
+$$
+f(t) = \frac{e^{-{t - t_0}/{\tau_{\text{fall}}}} - e^{-{t - t_0}/{\tau_{\text{rise}}}}}{\tau_{\text{fall}} - \tau_{\text{rise}}} u(t-t_0)
+$$
+
+When we scale this function by $A$, we get:
+
+$$
+\lambda(t) = A\cdot f(t)
+$$ 
+
+Where $\lambda(t)$ gives the rate of photo-electron flow at a given time t. At this point, we can define an array of arbitrary length and fill it with zeros in order to store a group of discrete values output from the function:
+
+$$
+f = [0,0,0,...]
+$$
+
+Additionally, let us store our time values in an array, $t$, of equal size. For a time bin $i$, centered at time $t$.
+
+$$
+\mu_i = \lambda(t_i)\Delta t
+$$
+
+Poisson statistics are commonly use in low-light PMT measurements. We assume that photoelectrons are produced independently and, as a result, we can sample for a Poisson distribution in order to calculate what the actual number of photoelectrons in that bin may look like [9].   
+
+$$
+N_{i} \sim Poisson( \mu_i )
+$$
+
+Next, we generate a pulse for every electron in each time bin. We begin by drawing from a gaussian distribution in order to determine the gain of each electron, as not all of them will produce the same pulse. 
+
+$$
+G_{ij} = \max(0,\mathcal{N}(1, \sigma^2))
+$$
+
+If we draw a negative from the distribution, we clip it to zero. We then model transit time spread using a Gaussian offset. Hamamatsu describes TTS as the full width at half maximum (FWHM) of the distribution of transit times [2]. We can convert it to the Gaussian standard deviation through the following: 
+
+$$
+\sigma_{TTS} = \frac{  TTS_{FWHM}}   {2\sqrt  {2\ln{2}}  }
+$$
+
+
+$$
+\Delta t_{ij} \sim \mathcal{N}(0, \sigma_{TTS}^2)
+$$
+
+Where $\sigma_{TTS} = \frac{TTS_{FWHM}}{    2\sqrt{2\ln(2)}         }$. After calculating the time delta, we add it to the original start time of the photoelectron. This yields $t_{ij} = t_i + \Delta t_{ij}$, which means that the time of an electron at a given time bin is the time of the time bin summed with the calculated time delta of the electron. 
+To calculate the voltage pulse contributed by a single electron we use the following: 
+
+$$
+V_{ij} = pA_{SPE}G_{ij}h_{ij}(t)
+$$
+
+
+Where:
+\begin{align*}
+p &\quad\to \text{Polarity} \\
+A_{SPE}   &\quad\to \text{The electron's pulse area} \\
+G_{ij}   &\quad\to \text{The random relative gain } \\
+h(t)    &\quad\to \text{A normalized bi-exponential with $t_{ij}$ as the pulse starting time and a $\tau_{fall}$ and $\tau_{rise}$ representing the rise and fall time of a single photoelectron pulse } \\
+\end{align*}
+
+We sum $V_{ij}$ for every photoelectron in each time bin. the final waveform is: 
+
+$$
+\sum_{i} \sum_{j=1}^{N_i} V_{ij}(t)
+$$
+
 
 \subsection{Amplifier}
-The amplifier class takes in a signal, subtracts it's baseline, and scales it by a gain factor. Low/high frequency cutoffs can also be applied by limiting how fast the voltage can change.
+The amplifier class serves to apply a gain to a passes in voltage array. Gain may either be a dimensionless constant or have units of decibels. If units of decibels are passed in, we use base 10 exponentiation in order to convert it into a usable, unit less constant. 
+
+$$
+A = 10^{A_{dB}/20}
+$$
+
+Importantly, whatever signal is being passed in must be not be an open circuit voltage signal. %"Can you assert this with some minimun cable?"
+This means that it must pass through our cable or connector model first. To begin amplification, we first subtract the voltage signal by the given baseline. %he wants us to explain what a baseline is, dont know exactly where you would want to add it
+
+
+$$
+V_{pulse} = V_{in} - V_{baseline} 
+$$
+
+Next, we scale the resulting signal by the given gain.
+
+$$
+V_{amplified} = V_{pulse} * A
+$$
+
+Scipy's lfilter function is used in order to apply a low and high pass filter. For both the low and high cutoff frequencies, we define the first order parameters to be :  
+
+$$
+\tau = \frac{1}{2\pi f_c}
+$$
+
+and 
+$$
+\alpha = 1 - e^{-\Delta t /\tau}
+$$
+Where $\Delta t$ is the time between each sample. 
+
+The first order low-pass recurrence is:
+
+$$
+y_{LP} = \alpha x[n] + (1 - \alpha)y_{LP}[n-1] 
+$$
+
+
+The high-pass filter used to remove low-frequencies is calculated by subtracting the low-pass result from the input. 
+
+
+$$
+y_{HP} = x[n] - y_{LP}[n]
+$$
+
+The recurrence is evaluated using SciPy's lfilter function [10]. In SciPy's coefficient notation:
+
+
+$$
+b = [\alpha]
+$$
+
+and 
+
+$$
+a = [1, -(1-\alpha)]
+$$
+
+The $b$ coefficient multiplies the current input sample. The second coefficient produces the contribution from the previous output. Scipy defined lfilter using the common filter difference equation [10] . 
+The initial filter state is: 
+
+$$
+z_i = (1 - \alpha) x[0]
+$$
+
+
+This yields:
+
+$$
+y[0] = \alpha x[0] + z_i = x[0]
+$$
+
+This prevents the beginning of the waveform to have a false starting point, forcing it to instead start at an equivalent voltage value of the original signal. 
+
+Slew rate limits restrict how rapidly the amplifier output can change [11]. If $V_{in}$ is the desired, raw voltage, we can apply the slew rate using the following :
+
+$$
+V_{\text{out}}[n] = \text{clip}( V_{\text{in}}[n], V_{\text{out}}[n-1] + S_{\downarrow} \Delta t, V_{\text{out}}[n-1] + S_{\uparrow} \Delta t )
+$$
+
+Where:
+
+$$
+S_{\uparrow} > 0 \ \text{and} \ S_{\downarrow} < 0 
+$$
+
+
+Here $S_{\uparrow}$ is the maximum gradient that is able to be expressed by the amplifier while the signal is rising, and $S_{\downarrow}$ is the maximum gradient that is able to be expressed by the amplifier while the signal is falling. These effects allow the amplifier to not only change the amplitude, but also the rise and fall times in addition to the signal bandwidth. 
+
+
+
 \subsection{Cable}
-The cable class does multiple things at once in its code, it calculates how much the signal weakens while traveling, calculates the reflections that happen at the beginning of the cable and the end, and how much of the signal actually enters the cable.
-\subsection{Circuit Analyzer}
-The circuit analyzer class is the component responsible for measuring and comparing every stage of the signal chain and gathering the result into a final report. It does not modify the signal but instead observes each waveform after it goes through a component, it will store the results and after multiple tests have been ran it can compare any two of them and produce a summary of how the signal changed across the chose components.
-\subsection{Connector/Terminators}
-Connectors are junction points, anywhere impedance can change and parts of the signal can reflect. Terminators represent what sits at the end of the line and is defined by a single impedance value. Both of these rely on the reflection coefficient.
+
+
+In our model, we design a cable class that simulates the effects of attenuation and reflections on a signal. When two components are connected with a cable, a voltage divider is formed between the source impedance,$Z_S$, and the characteristic impedance, $Z_0$. The signal launched into the cable is therefore given by: 
+
+$$
+V_{launch} = [V_{oc}(t) - V_b]\frac{Z_0}{Z_S+Z_0}
+$$
+
+
+Where $V_oc$ represents the open circuit source voltage. And $V_b$ is the signal baseline
+
+At the boundaries, the respective reflection coefficients are given by:
+
+$$
+\Gamma_L = \frac{Z_L - Z_0}{Z_L + Z_0}
+$$
+
+and 
+
+$$
+\Gamma_S = \frac{Z_S - Z_0}{Z_S + Z_0}
+$$
+
+
+A reflected signal will likely bounce between the two boundaries more than once. Our model calculates these reflections until the maximum number of round trips is reached, a quantity given by a user defined parameter, or the next arrival is outside of the allotted signal duration. 
+
+
+The voltage observed at the load can therefore be represented by the sum: 
+
+$$
+   V_{c}(t) = V_b + \sum_{n = 0}^{N-1} (1 + \Gamma_L)(\Gamma_L\Gamma_S)^n  V_{p}(t - (2n+1)t_{d})
+$$
+
+Where:
+\begin{align*}
+\Gamma_L &\quad\to \text{Refection coefficient at the load boundary} \\
+\Gamma_S  &\quad\to \text{Refection coefficient at the source boundary} \\
+t_d  &\quad\to \text{One way propagation delay through the cable} \\
+V_p(t)    &\quad\to \text{The initially launched waveform after one way, frequency dependent attenuation} \\
+N    &\quad\to \text{The number of arrivals included in the simulation} \\
+\end{align*}
+
+For every time the signal goes from the signal to the load and back to the source, we : 
+
+1. The signal is scaled by both the load and source reflection coefficients. After n round trips, this produces: 
+
+$$
+(\Gamma_L\Gamma_S)^n
+$$
+
+2. Each completed round trip adds a delay equal to twice the one-way delay. Therefore, the nth signal arrival reaches the load after: 
+
+$$
+t - (2n+1)t_{d}
+$$
+
+3. At the load boundary, the incident and reflected waveforms add [5]. Since: 
+
+$$
+V_r = \Gamma_L V_i
+$$
+
+The voltage measured at the load is:
+$$
+V_L = V_i + V_r = V_i + \Gamma_LV_i = (1 + \Gamma_L)V_i
+$$
+
+This is why we multiply by $1+\Gamma_L$
+
+
+
+
+\subsection{Connector}
+Connectors are junction points. It is a simplified version of the cable that serves to simply connect two components without accounting for attenuation or reflections. As a result, they act as a simple voltage divider.
+
+$$
+V_{in}(t) = V_b + [V_S(t) - V_b](\frac{Z_L}{Z_S + Z_L})
+$$
+
 \subsection{Discriminators}
-Leading/trailing edge discriminator marks a timing point when the signal crosses a fixed voltage. Like said previously, this brings up the timing walk where the marked time shifts depending on the pulse amplitude. The constant fraction discriminator is intended to correct this by triggering on a fixed fraction of each pulses own peak instead.
+
+A leading/trailing edge discriminator records timing points when the signal crosses a fixed voltage threshold [8]. In our model, we implement both constant fraction discrimination and edge discrimination.
+
+For a pulse of a positive polarity, the leading edge occurs when a signal rises beyond a certain threshold, and the trailing when that signal falls bellow it. These inequalities are reversed when applied to a signal with negative polarity. In order to determine threshold crossing, the model identifies indexes surrounding each crossing, before using linear interpolation to estimate the crossing times. 
+
+The difference between the two gives the time over the threshold. 
+
+$$
+t_{TR}-t_{LE}
+$$
+
+
+To build a constant fraction discriminator, we create an attenuated version of the signal and flip it's polarity. 
+
+$$
+V_A(t) = - f \cdot V_{in}(t)
+$$
+
+We then generate a delayed, non-attenuated version of the signal: 
+
+$$
+V_D(t) = V_{in}(t -t_{delay})
+$$
+
+Summing these yields : 
+$$
+V_{S} = V_D  +V_A
+$$
+
+The CFD timing point must satisfy the following: 
+
+$$
+V_s(T_{CF}) = 0
+$$
+
+The model interpolates between the samples surrounding the zero crossing to estimate $T_{CF}$. An arming threshold is used in our model. The CFD will only accept a zero crossing if the pulse has exceeded a given magnitude [8]. After recording a crossing, the model waits for the waveform to return under the arming threshold before accepting another event. this practice prevents small noise fluctuations that appear near the baseline to be mistaken for a true pulse. 
+
+
+
 \subsection{Digitizer}
 %Can try to make it more spepcific, kinda hard when all it does is just digitizze what the signal looks like
-Our digitizer code models an analog to digital converter that turns the PMT signal into a digital representation of what the signal would look like. Simply put, it does everything a real digitizer would show about a signal.
-\subsection{Signal Generator}
-The signal generator simulates a synthetic PMT waveform, a fast rise followed with a slow decay. The user can control the amplitude, rise and fall time. This was the first class we built because every other component that the signal would go through before reaching the digitizer needed something to act on.
+The digitizer models an analog-to-digital converter. Here, it is important to note that the analog waveform is already stored using two arrays, one for time and one for voltage. The Digitizer resamples the wave at a user-selected sampling rate, $f_s$. 
+
+The period if the digitizer is:
+$$
+T_S = \frac{1}{f_s}
+$$
+
+The digitizer sampling times are therefore: 
+
+$$
+T_k = t_0 + kT_s
+$$
+Where k are the integer step indexes, $(0,1,2,3 ...)$.
+
+
+We then evaluate our waveform at the times in $T_k$ and add a baseline. Because we have limited information on the original wave, as our "analog" representation is discrete, it is highly likely that we do not possess a voltage value for many of the times in $T_k$. As a result, we use linear interpolation in order to estimate voltage values for every given value in $T_k$. 
+
+
+$$
+V(t) = V_{interp}(t_k) + V_{DC}
+$$
+
+The offset allows zero volts to correspond to a code above the lowest ADC code. 
+
+Samples outside of the configured input range are clipped: 
+
+$$
+V(t)_{clipped} = \operatorname{clip}(V(t), V_{min}, V_{max})
+$$
+
+For a digitizer with N bits, the number of outputs code is calculated using: 
+
+$$
+M = 2^N
+$$
+
+The voltage between two discrete levels, or the least significant bit is represented by: 
+
+$$
+V_{LSB} = \frac{V_{max} - V_{min}}{M}
+$$
+
+Each clipped voltage is then assigned an integer code: 
+
+$$
+D_{c,k}(t) = clip(\lfloor \frac{V_{c,k} - V_{min} }{V_{LSB}}\rfloor, 0, M - 1)
+$$
+
+The reconstructed analog voltage $V_k(t)$ is calculated by mapping the digital codes back into the voltage domain using the midpoint reconstruction method:
+
+$$
+V_k(t) = V_{min} + (q_k + \frac{1}{2})V_{LSB}
+$$
+
+Where $q_k$ is a ADC code in $D_{c,k}$ at time $t$. 
+
+
 \subsection{Splitter}
-The splitter is modeled as a three-resistor network. The splitter only uses resistors and because of this it lowers the voltage without changing the signals shape or delaying the signal, and each output retrieves exactly half of the input voltage.
-%-------------------------------------------------------------
+The splitter is modeled as a passive three-resistor network. We define $R_1$ as the input resistor, $R_2$ as the output-1 resistor. and $R_3$ as the output-2 resistor. We also define $Z_S$ to be the source impedance, while $Z_{L1}$ and $Z_{L2}$ are the two branch loads.
+
+Define: 
+
+$$
+Z_{A} = Z_S + R_1
+$$
+
+$$
+Z_{B1} = R_2 + Z_{L1}
+$$
+
+and 
+
+$$
+Z_{B2} = R_3 + Z_{L2}
+$$
+
+To find the Thévenin signal at output 1, output 1 is temporarily treated as open while branch 2 remains connected. The output-1 Thévenin voltage is
+
+$$
+V_{TH,1}(t) = V_b + [V_{in}(t)-V_b] \frac{Z_{B2}}{Z_A+Z_{B2}}
+$$
+
+The equivalent output impedance is
+
+$$
+Z_{out,1} = R_2 + (Z_A \parallel Z_{B2})
+$$
+Similarly, the output-2 Thévenin voltage is
+
+$$
+V_{TH,2}(t) = V_b + [V_{in}(t)-V_b] \frac{Z_{B1}}{Z_A+Z_{B1}}
+$$
+and its output impedance is
+
+$$Z_{out,2} = R_3 + (Z_A \parallel Z_{B1})
+$$
+When output 1 is connected to its load, its delivered voltage is
+
+$$
+V_1(t) = V_b + [V_{TH,1}(t)-V_b] \frac{Z_{L1}}{Z_{out,1}+Z_{L1}}
+$$
+Output 2 follows the equivalent relationship:
+
+$$
+V_2(t) = V_b + [V_{TH,2}(t)-V_b] \frac{Z_{L2}}{Z_{out,2}+Z_{L2}}
+$$
+
+This in a ideal splitter model. The model does not account for frequency nor does it introduce propagation delay. 
+%-----------oss--------------------------------------------------
 \section{User-Guide/Results}
-For the user-guide this is the link to our GitHub, it will have all the steps to follow and code to read when using this tool.
+Source code can be found at the following cite: 
 \href{https://github.com/AverageAtBest000/SignalProcessingSimulator.git}{Octavio Gamez and Desiree Martinez: Signal Processing GitHub}.
-
-
 
 \Large
 \textbf{Results}
@@ -177,59 +580,76 @@ For the user-guide this is the link to our GitHub, it will have all the steps to
 
 \begin{figure}[!htbp]
     \centering
-    \includegraphics[width=0.7\textwidth]{Results_SignalProcessing.png}
-    \caption{Results}
+    \includegraphics[width=0.7\textwidth]{Figure_1.png}
+    \caption{An example of a full signal represented in the various steps of the code}
 \end{figure}
 
-As in the figure shown above, this should be what you see when you first run our code. This code shows the output for our PMT signal passing through a passive splitter to the digitizer. The original signal is roughly 0.046 in amplitude when the splitter comes into the picture both channels fall to about half of that value, around -0.023, at their peak. The two splitter channels overlap, which is expected, confirms that the splitter produces two identical outputs. The digitized version of split channel 2 drops by roughly half, making it roughly 0.0112. Even going through the splitter on all four of the signal/channels, the pulse’s overall timing and shape are preserved, along with the peaks occurring at approximately the same point in each case. Overall, this graph shows the splitter function and digitizer do affect the amplitude but also do not distort the pulse’s timing.
+Figure one shows the output of simulating a simple circuit.  The same circuit can be simulated using the instructions found in our repository's README. If ran again, the output will be different, but similar. We start with a signal generated by simulating a series of PMT waveforms at random times. The signal is then ran through the splitter model, which has been given equal resistance values for all three of it resistors. Finally, we use a Connector in order to pass the signal from branch 2 of our spitter into a digitizer. A variety of Diagnostic information will be printed in the terminal when ran. Notice how, after being ran to a splitter, the voltage signal was attenuated roughly by a factor of $\frac{1}{2}$. It was yet again attenuated after the Connector passed the waveform from the splitter into the digitizer. 
 
 %-------------------------------------------------------------
 \section{Limitations}
 % Add more limitations and next steps
 % In case you dont know how to just click enter for the next line and use the backslash \ and type item (\item)
 
-Because this tool was built in a short time frame (four weeks) and was focused around the core signal path rather than every possible real-world detail, it leaves room for limitations to fully unlocking the potential the tool can have.
-Some limitations that could come from what we have for our tool now are:
+Because this tool was built in a short time frame (four weeks) and was focused around the core signal path rather than every possible real-world detail, there is more room for further work to expand functionality.
+Some limitations are:
 %add more stuff im blanking on most of the stuff my head hurts
 \begin{itemize}
-    \item We only had four weeks time to build this
-    \item Noise is a rough estimate
+    \item Electronic noise is yet to be fully implemenented
     \item Tool stops at digitizer 
-    \item Reflection only bounces back once (doesn't account for the signal bouncing back and fourth multiple times)
-    \item Has not been tested against real hardware
+    \item The model has not been validated experimentally
+    \item Limited to PMT outputs (i.e. no drift chamber with longer timescales)
 \end{itemize}
 %-------------------------------------------------------------
 \section{Next Steps}
 
-Most of the limitations aren't dead ends that should be tossed away but are a list of ideas that haven't been finished yet or what could be improved in the future.
+Most of the limitations suggest future improvements.
 As we continue to work on this project and look towards the future, some ideas that we could implement are as follows:
 \begin{itemize}
-    \item Test the tool against real measurements to check accuracy and compare
-    \item Get it to support multiple reflections bouncing back and fourth
+    \item Test the tool against real measurements to verify accuracy and compare
     \item Add more components and source types
-    \item enhancing different features that are already implemented in our design
 \end{itemize}
 %-------------------------------------------------------------
 \section{Conclusion}
 
-Planning the analog signal path for particle physics has always been between choosing two paths: experience-based estimations and building a fully detailed simulation. These paths are not suited for the early planning stages of an experiment. This project was built with the idea to add another path for experimenters to use for their pre-planning stages. It's set to be an open-source tool that has a source, components that could mess up a signal, and giving back results about what experimenters want to know (reflections, distortion, and signal loss) before any hardware is built.
+Planning the analog signal path for particle physics has always been between choosing two paths: experience-based estimations and building a fully detailed simulation. These paths are not suitable for the early planning stages of an experiment. This project was built with the idea to add another path for experimenters to use for their pre-planning stages. It's set to be an open-source tool that has a source, components that could distort a signal, and giving back results about what experimenters want to know (reflections, distortion, and signal loss) before any hardware is built.
 
 %-------------------------------------------------------------
 \section{Acknowledgment}
 
-We would like to thank our mentor Juan Carlos Cornejo for his help in guiding us along the journey of creating this tool and giving his valuable feedback. We would like to thank Rhonda Crespo and Mark Galassi for letting us take on this internship and learning advanced computing techniques along with expanding our research skills. We would also like to acknowledge our co-workers/friends that we met through this internship, we all learned and grew together in the four weeks of this internship.
-% Might get rid of the last sentence it doesnt seem all that relevent, TBD
+We would like to thank our mentor, Juan Carlos Cornejo, for his help in guiding us along the journey of creating this tool and giving his valuable feedback. We would also like to thank Rhonda Crespo and Mark Galassi for letting us take on this internship.
 
 %-------------------------------------------------------------
-\newpage
 \section{References}
 
 \begin{itemize}
 \small
-    \item AverageAtBest. “GitHub - AverageAtBest000/SignalProcessingSimulator.” GitHub, \url{github.com/AverageAtBest000/SignalProcessingSimulator.git}.
-    \item Cornejo, Juan Carlos. “Signal Processing Summer Project Ideas.” Signal Processing Summer Project Ideas, project idea, 10 July 2026, p. Abstract.
-    \item GeeksforGeeks. “Spectrum Analysis in Python.” GeeksforGeeks, 23 July 2025, www.geeksforgeeks.org/artificial-intelligence/spectrum-analysis-in-python.
-    \item Journal of Open Source Software. joss.theoj.org.
+\item [1]L. W. Nagel, "SPICE2: A Computer Program to Simulate Semiconductor Circuits", University of California, Berkeley, May 1975. [Online]. Available: \url{https://www2.eecs.berkeley.edu/Pubs/TechRpts/1975/9602.html}
+
+
+\item [2]"Photomultiplier Tubes and Assemblies for Scintillation Counting & High Energy Physics," Hamamatsu Photonics K.K., Japan,. [Online]. Available: \url{https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/etd/High_energy_PMT_TPMZ0003E.pdf}
+
+
+\item [3]S. Li, X. Lyu, F. Wang, and C. Sun, "An Accurate Semi-Empirical Model for PMT Pulse Signal Analysis," PLOS ONE, vol. 19, no. 11, p. e0313999, Nov. 2024, doi: \url{10.1371/journal.pone.0313999.}
+
+
+\item [4]"Traveling Wave Optical Modulator Measured (TWOMM) - INTERCONNECT Element," Ansys Optics, Canonsburg, PA, USA. [Online]. Available: \url{https://optics.ansys.com/hc/en-us/articles/5263649653139-Traveling-Wave-Optical-Modulator-Measured-TWOMM-INTERCONNECT-Element}
+
+\item [5]"Product Documentation," National Instruments, Austin, TX, USA. [Online]. Available: \url{https://www.ni.com/docs/en-US/bundle/ni-hsdio/page/signal-reflections.html}
+
+
+\item  [6]" LMR-400 Flexible Low Loss Communications Coax" Times Microwave Systems, Wallingford, CT, USA. [Online]. Available: \url{https://timesmicrowave.com/wp-content/uploads/2022/06/lmr-400-datasheet-1.pdf}
+
+\item [7]"Product Documentation ," National Instruments, Austin, TX, USA. [Online]. Available: \url{https://www.ni.com/docs/en-US/bundle/ni-switch/page/bandwidth-and-insertion-loss.html}
+
+\item [8]"Choosing the Right Timing Discriminator for the Application Dead Time Effects in Counting or Timing." ORTEC Inc., Oak Ridge, TN, USA. [Online]. Available: \url{ https://www.ortec-online.com/-/media/ametekortec/other/fast-timing-discriminator-introduction.pdf}
+
+
+\item [9]M. Takahashi et al., "A Technique for Estimating the Absolute Gain of a Photomultiplier Tube," Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment, vol. 894, pp. 1–7, Mar. 2018, doi: \url{10.1016/j.nima.2018.03.034.}
+
+\item [10]"scipy.signal.lfilter — SciPy v1.18.0 manual," Scipy.org. [Online]. Available: \url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.lfilter.html} 
+
+\item [11]"MT-045: Op Amp Bandwidth," Analog Devices, Norwood, MA, USA. [Online]. Available: \url{https://www.analog.com/media/en/training-seminars/tutorials/MT-045.pdf}
 \end{itemize}
 
-\end{document}
+\end{document}https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/etd/High_energy_PMT_TPMZ0003E.pdf
